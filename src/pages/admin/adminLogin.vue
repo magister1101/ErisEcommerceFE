@@ -4,7 +4,6 @@
       <q-card-section class="flex flex-center">
         <img
           src="https://res.cloudinary.com/dvyjiepra/image/upload/v1744075727/Eris_LOGO_wy0z2j.png"
-          alt=""
           style="width: 132px"
         />
       </q-card-section>
