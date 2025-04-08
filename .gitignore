@@ -6,6 +6,8 @@ node_modules
 .quasar
 /dist
 /quasar.config.*.temporary.compiled*
+quasar.config.js
+.package-lock.json
 
 # Cordova related directories and files
 /src-cordova/node_modules
@@ -31,3 +33,6 @@ yarn-error.log*
 
 # local .env files
 .env.local*
+quasar.config.js
+quasar.config.js
+.gitignore
