@@ -57,11 +57,11 @@ const menuList = [
   {
     icon: 'list',
     label: 'Card List',
-    to: '/admin/cardList',
+    to: '/admin/ygo/cardList',
   },
   {
     icon: 'bolt',
-    label: 'expansion',
+    label: 'Config',
     to: '/#',
     separator: true,
   },
