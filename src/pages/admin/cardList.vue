@@ -4,6 +4,7 @@
     <q-table
       :rows="filteredCards"
       :columns="columns"
+      :loading="tableLoading"
       row-key="_id"
       :pagination="pagination"
       class="q-pa-none"
@@ -169,7 +170,6 @@ import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import { useRoute } from 'vue-router'
 import { uploadToCloud } from 'src/components/cloudinaryUtility'
-import { name } from '@vue/eslint-config-prettier/skip-formatting'
 import { Notify } from 'quasar'
 
 const route = useRoute()
@@ -180,7 +180,9 @@ const addDialog = ref(false)
 const editDialog = ref(false)
 const deleteDialog = ref(false)
 
+//loadings
 const dialogLoading = ref(false)
+const tableLoading = ref(false)
 
 // Dialog input data
 const dialogName = ref('')
@@ -263,11 +265,14 @@ async function saveCard() {
 }
 
 async function getCards() {
+  tableLoading.value = true
   try {
     const response = await axios.get(`${process.env.api_host}/cards?game=${game}&isArchived=false`)
     cards.value = response.data
   } catch (error) {
     console.error('Error fetching cards:', error)
+  } finally {
+    tableLoading.value = false
   }
 }
 
