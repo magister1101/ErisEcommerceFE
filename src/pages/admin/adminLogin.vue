@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center">
+  <q-page class="flex flex-center page">
     <div class="loginContainer">
       <q-card-section class="flex flex-center">
         <img
@@ -76,6 +76,7 @@ import axios from 'axios'
 import { ref, onMounted } from 'vue'
 import { Notify } from 'quasar'
 import { useRouter } from 'vue-router'
+import { validation } from 'src/components/adminViewerUtility'
 
 const loading = ref(false)
 const username = ref('testuser01')
@@ -125,17 +126,15 @@ async function login() {
   }
 }
 
-async function validation() {
-  const token = localStorage.getItem('authToken')
-
+async function validate() {
   try {
-    const response = await axios.get(`${process.env.api_host}/users/viewer`, {
-      headers: {
-        Authorization: token,
-      },
-    })
-    if (response.data.valid) {
-      router.replace('/admin/cardList')
+    const response = await validation()
+    const valid = response.valid
+
+    if (valid) {
+      router.replace('/admin/ygo/cardList/')
+    } else {
+      return
     }
   } catch (error) {
     console.log(error)
@@ -143,7 +142,7 @@ async function validation() {
 }
 
 onMounted(() => {
-  validation()
+  validate()
 })
 </script>
 
@@ -161,5 +160,7 @@ onMounted(() => {
 
 @media (max-width: 768px),( max-height: 768px)
   .loginContainer
-      width: 90%
+    background: rgba(0,0,0,0.0)
+  .page
+    background-color: #39B5FF
 </style>

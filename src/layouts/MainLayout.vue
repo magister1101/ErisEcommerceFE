@@ -1,22 +1,25 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated class="shadow-2" style="background-color: #114090">
-      <div class="q-pa-sm">
-        <q-toolbar class="text-white">
-          <p class="q-ma-xs text-h5">ERIS エリス</p>
-          <q-space />
+      <q-toolbar class="text-white q-pa-sm">
+        <p class="q-ma-xs text-h5">ERIS エリス</p>
+        <q-space />
 
-          <!--
-        notice shrink property since we are placing it
-        as child of QToolbar
-      -->
-          <q-tabs v-model="tab" shrink>
-            <q-tab name="tab1" label="Tab 1" />
-            <q-tab name="tab2" label="Tab 2" />
-            <q-tab name="tab3" label="Tab 3" />
-          </q-tabs>
-        </q-toolbar>
-      </div>
+        <q-input
+          dark
+          dense
+          standout
+          debounce="300"
+          class="q-ml-md"
+          v-model="searchInput"
+          placeholder="Search..."
+          style="max-width: 300px"
+        >
+          <template #append>
+            <q-btn flat icon="search" @click="search" :loading="searchLoading" />
+          </template>
+        </q-input>
+      </q-toolbar>
     </q-header>
 
     <q-page-container>
@@ -27,50 +30,36 @@
 
 <script setup>
 import { ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
+import { useRouter } from 'vue-router'
+import { Notify } from 'quasar'
 
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev',
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework',
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev',
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev',
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev',
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev',
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev',
-  },
-]
+const searchInput = ref('')
+const searchLoading = ref(false)
+
+async function search() {
+  searchLoading.value = true
+  try {
+    //route to search when done
+    Notify.create({
+      message: searchInput.value,
+      type: 'positive',
+      position: 'bottom',
+      timeout: 2000,
+    })
+  } catch (error) {
+    console.log(error)
+    Notify.create({
+      message: 'Error searching',
+      type: 'negative',
+      position: 'top',
+      timeout: 2000,
+    })
+  } finally {
+    searchLoading.value = false
+  }
+}
 </script>
+
+<style lang="sass" scoped>
+/* You can add custom styling here if needed */
+</style>

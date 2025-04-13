@@ -30,7 +30,7 @@
       <!-- Custom cell for "Image" -->
       <template v-slot:body-cell-file="props">
         <q-td :props="props">
-          <q-img :src="props.row.file" alt="Card Image" style="max-width: 80%" />
+          <q-img :src="props.row.file" alt="Card Image" class="table_card_img" />
         </q-td>
       </template>
 
@@ -61,7 +61,7 @@
       <q-card bordered style="border-radius: 10px; width: 100%">
         <q-form @submit.prevent="saveCard" class="q-mx-xl">
           <q-card-section>
-            <p class="text-h5">Create a new card</p>
+            <p class="text-h5">Create a new card - {{ game }}</p>
           </q-card-section>
 
           <div>
@@ -69,6 +69,7 @@
             <q-input v-model="dialogCode" label="Code" filled required />
             <q-input v-model="dialogSeries" label="Series" filled required />
             <q-input v-model="dialogRarity" label="Rarity" filled required />
+            <q-input v-model="dialogExpansion" label="Expansion" filled required />
             <q-input v-model="dialogPrice" label="Price" type="number" filled required />
             <q-input v-model="dialogQuantity" label="Quantity" type="number" filled required />
             <q-file
@@ -111,6 +112,7 @@
             <q-input v-model="dialogCode" label="Code" filled required />
             <q-input v-model="dialogSeries" label="Series" filled required />
             <q-input v-model="dialogRarity" label="Rarity" filled required />
+            <q-input v-model="dialogExpansion" label="Expansion" filled required />
             <q-input v-model="dialogPrice" label="Price" type="number" filled required />
             <q-input v-model="dialogQuantity" label="Quantity" type="number" filled required />
             <!-- <q-file
@@ -185,6 +187,7 @@ const dialogName = ref('')
 const dialogCode = ref('')
 const dialogSeries = ref('')
 const dialogRarity = ref('')
+const dialogExpansion = ref('')
 const dialogPrice = ref('')
 const dialogQuantity = ref('')
 const dialogImageFile = ref(null)
@@ -202,6 +205,7 @@ const columns = [
   { name: 'name', label: 'Name', align: 'left', field: 'name', sortable: true },
   { name: 'code', label: 'Code', align: 'left', field: 'code', sortable: true },
   { name: 'series', label: 'Series', align: 'left', field: 'series' },
+  { name: 'expansion', label: 'Expansion', align: 'left', field: 'expansion' },
   { name: 'rarity', label: 'Rarity', align: 'left', field: 'rarity' },
   { name: 'price', label: 'Price', align: 'right', field: 'price' },
   { name: 'quantity', label: 'Quantity', align: 'right', field: 'quantity' },
@@ -234,6 +238,7 @@ async function saveCard() {
       code: dialogCode.value,
       series: dialogSeries.value,
       rarity: dialogRarity.value,
+      expansion: dialogExpansion.value,
       price: dialogPrice.value,
       quantity: dialogQuantity.value,
       file: imageUrl,
@@ -245,6 +250,7 @@ async function saveCard() {
     dialogCode.value = ''
     dialogSeries.value = ''
     dialogRarity.value = ''
+    dialogExpansion.value = ''
     dialogPrice.value = ''
     dialogQuantity.value = ''
     dialogImageFile.value = null
@@ -273,6 +279,7 @@ async function openEditDialog(card) {
     dialogCode.value = response.data[0].code
     dialogSeries.value = response.data[0].series
     dialogRarity.value = response.data[0].rarity
+    dialogExpansion.value = response.data[0].expansion
     dialogPrice.value = response.data[0].price
     dialogQuantity.value = response.data[0].quantity
     dialogId.value = card._id
@@ -289,6 +296,7 @@ async function saveEditCard() {
       code: dialogCode.value,
       series: dialogSeries.value,
       rarity: dialogRarity.value,
+      expansion: dialogExpansion.value,
       price: dialogPrice.value,
       quantity: dialogQuantity.value,
     })
@@ -305,6 +313,7 @@ async function saveEditCard() {
     dialogCode.value = ''
     dialogSeries.value = ''
     dialogRarity.value = ''
+    dialogExpansion.value = ''
     dialogPrice.value = ''
     dialogQuantity.value = ''
     dialogImageFile.value = null
@@ -399,4 +408,12 @@ onMounted(() => {
 
 .q-file__input
   margin-top: 10px;
+
+.table_card_img
+  max-width: 80%
+
+
+@media (max-width: 768px),( max-height: 768px)
+  .table_card_img
+    width: 100px
 </style>

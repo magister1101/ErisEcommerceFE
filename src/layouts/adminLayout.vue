@@ -5,13 +5,13 @@
         <q-btn flat @click="drawer = !drawer" round dense icon="menu" />
         <p class="q-ma-xs text-h5">ERIS エリス</p>
         <q-space />
-        <q-tabs v-model="tab" shrink>
+        <q-tabs shrink>
           <q-btn color="white" icon="logout" label="Logout" @click="logout()" flat />
         </q-tabs>
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="drawer" :width="250" :breakpoint="500" bordered class="bg-white">
+    <q-drawer v-model="drawer" :width="250" :breakpoint="500" bordered class="bg-white" overlay>
       <q-scroll-area class="fit">
         <q-list>
           <template v-for="(menuItem, index) in menuList" :key="index">
@@ -46,7 +46,7 @@
 import { ref, onMounted } from 'vue'
 import { Notify } from 'quasar'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { validation } from '../components/adminViewerUtility.js'
 
 const drawer = ref(false)
 const router = useRouter()
@@ -62,33 +62,10 @@ const menuList = [
   {
     icon: 'bolt',
     label: 'Config',
-    to: '/#',
+    to: '/admin/ygo/config',
     separator: true,
   },
 ]
-
-async function validation() {
-  const token = localStorage.getItem('authToken')
-
-  try {
-    const response = await axios.get(`${process.env.api_host}/users/viewer`, {
-      headers: {
-        Authorization: token,
-      },
-    })
-    if (response.data.valid) {
-      viewer.value = response.data.user
-    }
-  } catch (error) {
-    console.log(error)
-    Notify.create({
-      message: 'validation Failed',
-      type: 'negative',
-    })
-    localStorage.clear()
-    router.push('/')
-  }
-}
 
 function logout() {
   try {
@@ -99,7 +76,7 @@ function logout() {
       position: 'top',
       timeout: 1000,
     })
-    router.push('/')
+    router.push('/secret/')
   } catch (error) {
     console.log(error)
     Notify.create({
@@ -109,8 +86,21 @@ function logout() {
   }
 }
 
+async function validate() {
+  try {
+    const response = await validation()
+    viewer.value = response.user
+  } catch (error) {
+    console.log(error)
+    Notify.create({
+      message: 'error in validate function',
+      type: 'negative',
+    })
+  }
+}
+
 onMounted(() => {
-  validation()
+  validate()
 })
 </script>
 
