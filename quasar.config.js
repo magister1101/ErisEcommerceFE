@@ -51,8 +51,8 @@ export default defineConfig((/* ctx */) => {
       // publicPath: '/',
       // analyze: true,
       env: {
-        api_host: "http://localhost:3000",
-        // api_host: "https://eris-ecommerce-be.vercel.app",
+        // api_host: "http://localhost:3000",
+        api_host: "https://eris-ecommerce-be.vercel.app",
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
