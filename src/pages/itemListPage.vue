@@ -187,7 +187,8 @@ watch(searchQuery, () => {
       card.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       card.expansion.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       card.code.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      card.series.toLowerCase().includes(searchQuery.value.toLowerCase())
+      card.series.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      card.rarity.toLowerCase().includes(searchQuery.value.toLowerCase())
     )
   })
 })
