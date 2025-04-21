@@ -66,13 +66,34 @@
           </q-card-section>
 
           <div>
-            <q-input v-model="dialogName" label="Name" filled required />
-            <q-input v-model="dialogCode" label="Code" filled required />
-            <q-input v-model="dialogSeries" label="Series" filled required />
-            <q-input v-model="dialogRarity" label="Rarity" filled required />
-            <q-input v-model="dialogExpansion" label="Expansion" filled required />
-            <q-input v-model="dialogPrice" label="Price" type="number" filled required />
-            <q-input v-model="dialogQuantity" label="Quantity" type="number" filled required />
+            <q-input class="q-pb-sm" v-model="dialogName" label="Name" filled required />
+            <q-input class="q-pb-sm" v-model="dialogCode" label="Code" filled required />
+            <q-input class="q-pb-sm" v-model="dialogSeries" label="Series" filled required />
+            <q-input class="q-pb-sm" v-model="dialogRarity" label="Rarity" filled required />
+            <q-select
+              class="q-pb-sm"
+              v-model="dialogExpansion"
+              :options="expansions"
+              label="Expansion"
+              filled
+              required
+            />
+            <q-input
+              class="q-pb-sm"
+              v-model="dialogPrice"
+              label="Price"
+              type="number"
+              filled
+              required
+            />
+            <q-input
+              class="q-pb-sm"
+              v-model="dialogQuantity"
+              label="Quantity"
+              type="number"
+              filled
+              required
+            />
             <q-file
               class="q-px-md"
               v-model="dialogImageFile"
@@ -109,13 +130,34 @@
           </q-card-section>
 
           <div>
-            <q-input v-model="dialogName" label="Name" filled required />
-            <q-input v-model="dialogCode" label="Code" filled required />
-            <q-input v-model="dialogSeries" label="Series" filled required />
-            <q-input v-model="dialogRarity" label="Rarity" filled required />
-            <q-input v-model="dialogExpansion" label="Expansion" filled required />
-            <q-input v-model="dialogPrice" label="Price" type="number" filled required />
-            <q-input v-model="dialogQuantity" label="Quantity" type="number" filled required />
+            <q-input class="q-pb-sm" v-model="dialogName" label="Name" filled required />
+            <q-input class="q-pb-sm" v-model="dialogCode" label="Code" filled required />
+            <q-input class="q-pb-sm" v-model="dialogSeries" label="Series" filled required />
+            <q-input class="q-pb-sm" v-model="dialogRarity" label="Rarity" filled required />
+            <q-select
+              class="q-pb-sm"
+              :options="expansions"
+              v-model="dialogExpansion"
+              label="Expansion"
+              filled
+              required
+            />
+            <q-input
+              class="q-pb-sm"
+              v-model="dialogPrice"
+              label="Price"
+              type="number"
+              filled
+              required
+            />
+            <q-input
+              class="q-pb-sm"
+              v-model="dialogQuantity"
+              label="Quantity"
+              type="number"
+              filled
+              required
+            />
             <!-- <q-file
               class="q-px-md"
               v-model="dialogImageFile"
@@ -129,7 +171,14 @@
             </q-file> -->
           </div>
           <q-card-action>
-            <q-btn flat label="Cancel" v-close-popup color="negative" class="q-px-md" />
+            <q-btn
+              flat
+              label="Cancel"
+              @click="resetDialogs()"
+              v-close-popup
+              color="negative"
+              class="q-px-md"
+            />
             <q-btn
               type="submit"
               flat
@@ -144,7 +193,7 @@
     </q-dialog>
 
     <q-dialog v-model="deleteDialog" persistent>
-      <q-card bordered style="border-radius: 10px; width: 20%">
+      <q-card bordered class="delete_card_dialog" style="border-radius: 10px">
         <q-card-section>
           <p>Delete {{ dialogName }} - {{ dialogRarity }}?</p>
         </q-card-section>
@@ -198,6 +247,9 @@ const dialogId = ref('')
 
 const cards = ref([]) // This will store the cards data
 
+//options
+const expansions = ref([])
+
 const pagination = ref({ rowsPerPage: 10 })
 const searchQuery = ref('')
 
@@ -248,6 +300,17 @@ async function saveCard() {
     })
 
     // Reset form after successful submission
+    resetDialogs()
+
+    getCards()
+  } catch (error) {
+    console.error('Error submitting form:', error)
+  }
+}
+
+async function resetDialogs() {
+  try {
+    console.log('thiss')
     dialogName.value = ''
     dialogCode.value = ''
     dialogSeries.value = ''
@@ -257,10 +320,8 @@ async function saveCard() {
     dialogQuantity.value = ''
     dialogImageFile.value = null
     addDialog.value = false
-
-    getCards()
-  } catch (error) {
-    console.error('Error submitting form:', error)
+  } catch (err) {
+    console.console.error('Error resetting dialogs:', err)
   }
 }
 
@@ -273,6 +334,17 @@ async function getCards() {
     console.error('Error fetching cards:', error)
   } finally {
     tableLoading.value = false
+  }
+}
+
+async function getExpansions() {
+  try {
+    const response = await axios.get(`${process.env.api_host}/config/expansion/get?game=${game}`)
+
+    console.log(response.data.map((expansion) => expansion.name))
+    expansions.value = response.data.map((expansion) => expansion.name)
+  } catch (error) {
+    console.error('Error fetching expansions:', error)
   }
 }
 
@@ -362,6 +434,7 @@ async function deleteCard() {
 
 onMounted(() => {
   getCards()
+  getExpansions()
 })
 </script>
 
@@ -384,9 +457,6 @@ onMounted(() => {
   padding: 16px;
 
 
-.q-input,
-.q-file
-  margin-bottom: 12px;
 
 
 .q-btn
@@ -414,11 +484,18 @@ onMounted(() => {
 .q-file__input
   margin-top: 10px;
 
+
+
 .table_card_img
   max-width: 80%
+
+.delete_card_dialog
+  width: 20%
 
 
 @media (max-width: 768px),( max-height: 768px)
   .table_card_img
     width: 100px
+  .delete_card_dialog
+    width: 100%
 </style>
