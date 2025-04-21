@@ -69,7 +69,14 @@
             <q-input class="q-pb-sm" v-model="dialogName" label="Name" filled required />
             <q-input class="q-pb-sm" v-model="dialogCode" label="Code" filled required />
             <q-input class="q-pb-sm" v-model="dialogSeries" label="Series" filled required />
-            <q-input class="q-pb-sm" v-model="dialogRarity" label="Rarity" filled required />
+            <q-select
+              class="q-pb-sm"
+              v-model="dialogRarity"
+              :options="rarities"
+              label="Rarity"
+              filled
+              required
+            />
             <q-select
               class="q-pb-sm"
               v-model="dialogExpansion"
@@ -133,7 +140,14 @@
             <q-input class="q-pb-sm" v-model="dialogName" label="Name" filled required />
             <q-input class="q-pb-sm" v-model="dialogCode" label="Code" filled required />
             <q-input class="q-pb-sm" v-model="dialogSeries" label="Series" filled required />
-            <q-input class="q-pb-sm" v-model="dialogRarity" label="Rarity" filled required />
+            <q-select
+              class="q-pb-sm"
+              v-model="dialogRarity"
+              :options="rarities"
+              label="Rarity"
+              filled
+              required
+            />
             <q-select
               class="q-pb-sm"
               :options="expansions"
@@ -249,6 +263,7 @@ const cards = ref([]) // This will store the cards data
 
 //options
 const expansions = ref([])
+const rarities = ref([])
 
 const pagination = ref({ rowsPerPage: 10 })
 const searchQuery = ref('')
@@ -341,10 +356,19 @@ async function getExpansions() {
   try {
     const response = await axios.get(`${process.env.api_host}/config/expansion/get?game=${game}`)
 
-    console.log(response.data.map((expansion) => expansion.name))
     expansions.value = response.data.map((expansion) => expansion.name)
   } catch (error) {
     console.error('Error fetching expansions:', error)
+  }
+}
+
+async function getRarities() {
+  try {
+    const response = await axios.get(`${process.env.api_host}/config/rarity/get?game=${game}`)
+
+    rarities.value = response.data.map((rarity) => rarity.code)
+  } catch (error) {
+    console.error('Error fetching expansion:', error)
   }
 }
 
@@ -434,6 +458,7 @@ async function deleteCard() {
 
 onMounted(() => {
   getCards()
+  getRarities()
   getExpansions()
 })
 </script>

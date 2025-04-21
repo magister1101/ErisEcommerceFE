@@ -20,9 +20,29 @@
         <div
           v-for="card in filteredCards"
           :key="card._id"
-          class="col-12 col-sm-10 col-md-6 col-lg-5 col-xl-2"
+          class="col-12 col-sm-10 col-md-6 col-lg-5 col-xl-3"
         >
-          <q-card flat bordered class="q-pa-sm row no-wrap items-start">
+          <q-card
+            flat
+            bordered
+            class="q-pa-sm row no-wrap items-start card-hover"
+            style="
+              position: relative;
+              transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+            "
+          >
+            <!-- Add button -->
+            <q-btn
+              dense
+              round
+              icon="add"
+              color="primary"
+              class="absolute-top-right q-ma-sm z-top"
+              style="opacity: 0.6"
+            />
+
             <!-- Left: Image -->
             <q-img
               :src="card.file || 'https://via.placeholder.com/150x210?text=No+Image'"
@@ -32,7 +52,8 @@
             />
 
             <!-- Right: Info -->
-            <div class="column justify-between q-gutter-xs" style="flex: 1">
+            <div class="column q-gutter-xs" style="flex: 1; position: relative; min-height: 200px">
+              <!-- Top Info -->
               <div>
                 <div class="text-subtitle1 text-weight-medium">{{ card.name }}</div>
                 <div class="text-caption text-grey">{{ card.expansion }}</div>
@@ -41,17 +62,15 @@
                 <div class="text-caption text-grey">⭐ {{ card.rarity }}</div>
               </div>
 
-              <div class="row items-center justify-between">
-                <div class="text-bold text-primary">₱{{ card.price.toFixed(2) }}</div>
+              <!-- Bottom fixed to bottom -->
+              <div
+                class="row items-center justify-between bottomDiv"
+                style="position: absolute; bottom: 0; left: 0; right: 0"
+              >
+                <div class="text-bold text-primary">{{ card.quantity }} in Stock</div>
+                <div class="text-bold text-accent text-h6">₱{{ card.price.toFixed(2) }}</div>
               </div>
             </div>
-            <q-btn
-              size="sm"
-              :disable="card.quantity === 0"
-              :label="card.quantity === 0 ? 'Out of Stock' : 'add'"
-              color="primary"
-              rounded
-            />
           </q-card>
         </div>
       </div>
@@ -68,6 +87,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
+import router from 'src/router'
 
 const route = useRoute()
 const game = route.params.game
@@ -125,6 +145,12 @@ onMounted(() => {
 </script>
 
 <style lang="sass" scoped>
+.card-hover:hover
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+
+
 @media (max-width: 768px),( max-height: 768px)
   .cardAll
     justify-content: center

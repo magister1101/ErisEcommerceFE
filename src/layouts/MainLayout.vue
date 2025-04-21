@@ -27,23 +27,21 @@
       <router-view />
     </q-page-container>
 
-    <q-footer reveal class="text-white q-pa-md" style="background-color: #114090">
+    <!-- <q-footer reveal class="text-white q-pa-md" style="background-color: #114090">
       <div class="row items-center justify-between">
-        <!-- Brand / Logo -->
-        <!-- <div class="text-h6">MyApp</div> -->
+        <div class="text-h6">MyApp</div>
 
-        <!-- Navigation Links -->
-        <!-- <div class="row q-gutter-sm items-center">
+        <div class="row q-gutter-sm items-center">
           <q-btn flat dense label="Home" to="/" class="text-white" />
           <q-btn flat dense label="About" to="/about" class="text-white" />
           <q-btn flat dense label="Contact" to="/contact" class="text-white" />
-        </div> -->
+        </div>
       </div>
 
       <div class="text-caption text-center q-mt-sm">
         © {{ new Date().getFullYear() }} Eris. All rights reserved.
       </div>
-    </q-footer>
+    </q-footer> -->
   </q-layout>
 </template>
 <script setup>
