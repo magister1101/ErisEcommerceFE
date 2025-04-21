@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout class="container" view="lHh Lpr lFf">
     <q-header reveal elevated class="shadow-2" style="background-color: #114090">
       <q-toolbar class="text-white q-pa-sm">
         <p v-on:click="$router.push('/')" class="q-ma-xs text-h5 brand-name">ERIS エリス</p>
@@ -77,6 +77,8 @@ async function search() {
 </script>
 
 <style lang="sass" scoped>
+.container
+  background: radial-gradient(circle, rgba(255,255,255,1) 80%, rgba(155,187,199,1) 100%);
 .brand-name
   font-size: 1.5rem
 

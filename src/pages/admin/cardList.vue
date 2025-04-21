@@ -298,6 +298,7 @@ const filteredCards = computed(() => {
 
 // Submit form handler
 async function saveCard() {
+  dialogLoading.value = true
   try {
     const imageUrl = await uploadToCloud(dialogImageFile.value)
 
@@ -320,6 +321,8 @@ async function saveCard() {
     getCards()
   } catch (error) {
     console.error('Error submitting form:', error)
+  } finally {
+    dialogLoading.value = false
   }
 }
 
