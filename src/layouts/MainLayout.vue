@@ -2,7 +2,13 @@
   <q-layout class="container" view="lHh Lpr lFf">
     <q-header reveal elevated class="shadow-2" style="background-color: #114090">
       <q-toolbar class="text-white q-pa-sm">
-        <p v-on:click="$router.push('/')" class="q-ma-xs text-h5 brand-name">ERIS エリス</p>
+        <p
+          v-on:click="$router.push('/')"
+          class="q-ma-xs text-h5 brand-name"
+          style="cursor: pointer"
+        >
+          ERIS エリス
+        </p>
         <q-space />
 
         <q-input

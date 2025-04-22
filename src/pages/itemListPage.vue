@@ -35,6 +35,8 @@
               style="box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)"
             >
               <q-card
+                clickable
+                @click="goToCard(card._id)"
                 flat
                 bordered
                 class="q-pa-sm row no-wrap items-start card-hover"
@@ -100,10 +102,11 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 
 const route = useRoute()
+const router = useRouter()
 const game = route.params.game
 
 const cards = ref([])
@@ -179,6 +182,15 @@ async function getCards() {
   }
 }
 
+async function goToCard(cardId) {
+  console.log(cardId)
+  try {
+    await router.push(`/card/${cardId}`)
+  } catch (error) {
+    console.error('Error redirecting to card:', error)
+  }
+}
+
 // Filter on search
 watch(searchQuery, () => {
   currentPage.value = 1
@@ -203,6 +215,7 @@ onMounted(() => {
   transform: scale(1.02)
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1)
   z-index: 2
+  cursor: pointer
 
 @media (max-width: 768px), (max-height: 768px)
   .cardAll
