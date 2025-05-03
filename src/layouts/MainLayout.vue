@@ -1,94 +1,91 @@
 <template>
   <q-layout class="container" view="lHh Lpr lFf">
     <q-header reveal elevated class="shadow-2" style="background-color: #114090">
-      <q-toolbar class="text-white q-pa-sm">
-        <p
-          v-on:click="$router.push('/')"
-          class="q-ma-xs text-h5 brand-name"
-          style="cursor: pointer"
-        >
-          ERIS エリス
-        </p>
-        <q-space />
+      <q-toolbar class="text-white q-px-lg q-py-md justify-between">
+        <!-- Left: Logo + Brand -->
+        <div class="row items-center no-wrap cursor-pointer" @click="$router.push('/')">
+          <img
+            src="https://res.cloudinary.com/dvyjiepra/image/upload/v1744075727/Eris_LOGO_wy0z2j.png"
+            alt="Eris Logo"
+            style="width: 40px; height: auto"
+          />
+          <span class="q-ml-sm text-h5 text-bold brand-name">ERIS エリス</span>
+        </div>
 
-        <q-input
-          dark
-          dense
-          standout
-          debounce="300"
-          class="q-ml-md searchBar"
-          v-model="searchInput"
-          placeholder="Search..."
-          style="max-width: 300px"
-        >
-          <template #append>
-            <q-btn flat icon="search" @click="search" :loading="searchLoading" />
-          </template>
-        </q-input>
-        <q-btn flat icon="shopping_cart" @click="$router.push('/cart')" />
+        <!-- Center Nav: Only visible on md and up -->
+        <div class="row justify-center q-gutter-xl items-center gt-md q-md-flex">
+          <span class="text-h6 cursor-pointer" @click="$router.push('/products')">Products</span>
+          <span class="text-h6 cursor-pointer" @click="$router.push('/preOrders')">Pre-Orders</span>
+          <span class="text-h6 cursor-pointer" @click="$router.push('/others')">Others</span>
+        </div>
+
+        <!-- Right: Account, Cart, and Mobile Menu -->
+        <div class="row items-center q-gutter-md">
+          <q-btn
+            flat
+            round
+            dense
+            icon="account_circle"
+            @click="$router.push('/account')"
+            class="q-hidden q-md-inline"
+          />
+          <q-btn
+            flat
+            round
+            dense
+            icon="shopping_cart"
+            @click="$router.push('/cart')"
+            class="q-hidden q-md-inline"
+          />
+          <q-btn flat dense icon="menu" class="lt-lg" @click="mobileMenu = !mobileMenu" />
+        </div>
       </q-toolbar>
+
+      <!-- Mobile Nav Slide Down -->
+      <q-slide-transition>
+        <div v-show="mobileMenu" class="column q-pa-md q-gutter-sm lt-lg">
+          <span class="text-subtitle1 cursor-pointer" @click="navigate('/products')">Products</span>
+          <span class="text-subtitle1 cursor-pointer" @click="navigate('/preOrders')"
+            >Pre-Orders</span
+          >
+          <span class="text-subtitle1 cursor-pointer" @click="navigate('/others')">Others</span>
+        </div>
+      </q-slide-transition>
     </q-header>
 
     <q-page-container>
       <router-view />
     </q-page-container>
 
-    <!-- <q-footer reveal class="text-white q-pa-md" style="background-color: #114090">
-      <div class="row items-center justify-between">
-        <div class="text-h6">MyApp</div>
-
-        <div class="row q-gutter-sm items-center">
-          <q-btn flat dense label="Home" to="/" class="text-white" />
-          <q-btn flat dense label="About" to="/about" class="text-white" />
-          <q-btn flat dense label="Contact" to="/contact" class="text-white" />
-        </div>
-      </div>
-
-      <div class="text-caption text-center q-mt-sm">
-        © {{ new Date().getFullYear() }} Eris. All rights reserved.
-      </div>
-    </q-footer> -->
+    <Footer />
   </q-layout>
 </template>
+
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import Footer from '../components/footerComponent.vue'
 import { Notify } from 'quasar'
 
-const searchInput = ref('')
-const searchLoading = ref(false)
+const router = useRouter()
+const mobileMenu = ref(false)
 
-async function search() {
-  searchLoading.value = true
-  try {
-    //route to search when done
-    Notify.create({
-      message: searchInput.value,
-      type: 'positive',
-      position: 'bottom',
-      timeout: 2000,
-    })
-  } catch (error) {
-    console.log(error)
-    Notify.create({
-      message: 'Error searching',
-      type: 'negative',
-      position: 'top',
-      timeout: 2000,
-    })
-  } finally {
-    searchLoading.value = false
-  }
+const searchInput = ref('')
+
+function navigate(path) {
+  mobileMenu.value = false
+  router.push(path)
 }
 </script>
 
 <style lang="sass" scoped>
 .container
-  background: radial-gradient(circle, rgba(255,255,255,1) 80%, rgba(155,187,199,1) 100%);
-.brand-name
-  font-size: 1.5rem
+  background: radial-gradient(circle, rgba(255,255,255,1) 50%, rgba(155,187,199,1) 100%)
 
-@media (max-width: 768px),( max-height: 768px)
+.brand-name
+  font-size: 1.25rem
+
+@media (max-width: 768px), (max-height: 768px)
   .brand-name
     font-size: 1rem
   .searchBar

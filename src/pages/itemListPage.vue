@@ -1,9 +1,5 @@
 <template>
   <q-page class="q-pa-md">
-    <div>
-      <div class="text-h5 text-left q-mb-md">{{ game.toUpperCase() }}</div>
-    </div>
-
     <!-- Search input -->
     <q-input v-model="searchQuery" label="Search Cards" outlined debounce="300" class="q-mb-md" />
 
@@ -107,7 +103,6 @@ import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
-const game = route.params.game
 
 const cards = ref([])
 const filteredCards = ref([])
@@ -172,7 +167,7 @@ const totalPages = computed(() => Math.ceil(flatSortedCards.value.length / items
 async function getCards() {
   tableLoading.value = true
   try {
-    const response = await axios.get(`${process.env.api_host}/cards?game=${game}&isArchived=false`)
+    const response = await axios.get(`${process.env.api_host}/cards?isArchived=false`)
     cards.value = response.data
     filteredCards.value = response.data
   } catch (error) {

@@ -1,21 +1,64 @@
 <template>
-  <q-page class="flex flex-center">
-    <q-section class="full-width">
-      <div class="q-gutter-md row justify-center items-center q-col-gutter-md">
-        <q-card
-          v-for="game in games"
-          :key="game.name"
-          class="game-card col-10 col-sm-6 col-md-4 col-lg-3"
-          clickable
-          @click="goToGame(game.route)"
-        >
-          <q-img :src="game.image" fit="contain" style="height: 200px" />
-          <q-card-section class="text-center">
-            <div class="text-h6">{{ game.name }}</div>
-          </q-card-section>
-        </q-card>
+  <q-page class="column q-pa-none" style="min-height: 100vh">
+    <!-- Hero Section (Full Width) -->
+    <div
+      style="
+        position: relative;
+        background-image: url(https://res.cloudinary.com/dvyjiepra/image/upload/v1746225405/bg_kibedb.jpg);
+        background-size: cover;
+        background-position: center;
+        width: 100%;
+        min-height: 800px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 2rem;
+      "
+    >
+      <!-- Dark Overlay -->
+      <div
+        style="
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+          z-index: 1;
+        "
+      ></div>
+
+      <!-- Content -->
+      <div style="position: relative; z-index: 2">
+        <p class="text-h1" style="font-weight: bold; color: white">
+          ERIS <span style="white-space: nowrap">エリス</span>
+        </p>
+        <p style="font-weight: bold; font-size: 1rem; color: white">
+          Your ultimate destination for premium cards, unbeatable deals, and fast, reliable
+          delivery.
+        </p>
       </div>
-    </q-section>
+    </div>
+
+    <!-- Additional Sections -->
+    <div class="q-mx-xl q-my-md">
+      <q-card-section class="display-cards">
+        <p class="text-h5" style="font-weight: bold">Featured Cards</p>
+        <div class="q-my-xl">
+          <p>DISPLAY FEATURED CARDS HERE</p>
+        </div>
+      </q-card-section>
+    </div>
+
+    <div class="q-mx-xl q-my-md">
+      <q-card-section class="display-cards">
+        <p class="text-h5" style="font-weight: bold">Newly Added Cards</p>
+        <div class="q-my-xl">
+          <p>DISPLAY NEWLY ADDED CARDS HERE</p>
+        </div>
+      </q-card-section>
+    </div>
   </q-page>
 </template>
 
@@ -23,28 +66,14 @@
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-
-const games = [
-  {
-    name: 'YUGIOH',
-    image: 'https://res.cloudinary.com/dvyjiepra/image/upload/v1745242597/Yu-Gi-Oh_frilmo.png',
-    route: '/item/ygo',
-  },
-  // Add more games here...
-]
-
-function goToGame(route) {
-  router.push(route)
-}
 </script>
 
-<style scoped>
-.game-card {
-  transition: transform 0.2s;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-.game-card:hover {
-  transform: scale(1.03);
-}
+<style lang="sass" scoped>
+.display-cards
+  margin: 0px 10% 0px 10%
+
+
+@media (max-width: 768px)
+  .display-cards
+    margin: 0px 0px 0px 0px
 </style>
