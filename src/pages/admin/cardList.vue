@@ -79,6 +79,14 @@
             />
             <q-select
               class="q-pb-sm"
+              v-model="dialogGame"
+              :options="games"
+              label="Game"
+              filled
+              required
+            />
+            <q-select
+              class="q-pb-sm"
               v-model="dialogExpansion"
               :options="expansions"
               label="Expansion"
@@ -123,6 +131,14 @@
               class="q-px-md"
               :loading="dialogLoading"
             />
+            <q-btn
+              flat
+              color="info"
+              label="Clear"
+              class="q-px-md"
+              :loading="dialogLoading"
+              @click="clearDialogs()"
+            />
           </q-card-action>
         </q-form>
       </q-card>
@@ -145,6 +161,14 @@
               v-model="dialogRarity"
               :options="rarities"
               label="Rarity"
+              filled
+              required
+            />
+            <q-select
+              class="q-pb-sm"
+              v-model="dialogGame"
+              :options="games"
+              label="Game"
               filled
               required
             />
@@ -209,7 +233,7 @@
     <q-dialog v-model="deleteDialog" persistent>
       <q-card bordered class="delete_card_dialog" style="border-radius: 10px">
         <q-card-section>
-          <p>Delete {{ dialogName }} - {{ dialogRarity }}?</p>
+          <p>Delete {{ dialogGame }}: {{ dialogName }} - {{ dialogRarity }}?</p>
         </q-card-section>
         <q-card-action>
           <q-btn flat label="Cancel" v-close-popup color="negative" class="q-px-md" />
@@ -256,7 +280,7 @@ const dialogExpansion = ref('')
 const dialogPrice = ref('')
 const dialogQuantity = ref('')
 const dialogImageFile = ref(null)
-const dialogGame = ref(game)
+const dialogGame = ref('')
 const dialogId = ref('')
 
 const cards = ref([]) // This will store the cards data
@@ -264,6 +288,7 @@ const cards = ref([]) // This will store the cards data
 //options
 const expansions = ref([])
 const rarities = ref([])
+const games = ref([])
 
 const pagination = ref({ rowsPerPage: 10 })
 const searchQuery = ref('')
@@ -271,6 +296,7 @@ const searchQuery = ref('')
 // Define the table columns
 const columns = [
   { name: 'file', label: 'Image', align: 'center', field: 'file' },
+  { name: 'game', label: 'Game', align: 'center', field: 'game' },
   { name: 'name', label: 'Name', align: 'left', field: 'name', sortable: true },
   { name: 'code', label: 'Code', align: 'left', field: 'code', sortable: true },
   { name: 'series', label: 'Series', align: 'left', field: 'series' },
@@ -328,7 +354,6 @@ async function saveCard() {
 
 async function resetDialogs() {
   try {
-    console.log('thiss')
     dialogName.value = ''
     dialogCode.value = ''
     dialogSeries.value = ''
@@ -337,7 +362,24 @@ async function resetDialogs() {
     dialogPrice.value = ''
     dialogQuantity.value = ''
     dialogImageFile.value = null
+    dialogGame.value = ''
     addDialog.value = false
+  } catch (err) {
+    console.console.error('Error resetting dialogs:', err)
+  }
+}
+
+async function clearDialogs() {
+  try {
+    dialogName.value = ''
+    dialogCode.value = ''
+    dialogSeries.value = ''
+    dialogRarity.value = ''
+    dialogExpansion.value = ''
+    dialogPrice.value = ''
+    dialogQuantity.value = ''
+    dialogImageFile.value = null
+    dialogGame.value = ''
   } catch (err) {
     console.console.error('Error resetting dialogs:', err)
   }
@@ -346,7 +388,7 @@ async function resetDialogs() {
 async function getCards() {
   tableLoading.value = true
   try {
-    const response = await axios.get(`${process.env.api_host}/cards?game=${game}&isArchived=false`)
+    const response = await axios.get(`${process.env.api_host}/cards?isArchived=false`)
     cards.value = response.data
   } catch (error) {
     console.error('Error fetching cards:', error)
@@ -357,7 +399,7 @@ async function getCards() {
 
 async function getExpansions() {
   try {
-    const response = await axios.get(`${process.env.api_host}/config/expansion/get?game=${game}`)
+    const response = await axios.get(`${process.env.api_host}/config/expansion/get`)
 
     expansions.value = response.data.map((expansion) => expansion.name)
   } catch (error) {
@@ -367,9 +409,19 @@ async function getExpansions() {
 
 async function getRarities() {
   try {
-    const response = await axios.get(`${process.env.api_host}/config/rarity/get?game=${game}`)
+    const response = await axios.get(`${process.env.api_host}/config/rarity/get`)
 
     rarities.value = response.data.map((rarity) => rarity.code)
+  } catch (error) {
+    console.error('Error fetching expansion:', error)
+  }
+}
+
+async function getGames() {
+  try {
+    const response = await axios.get(`${process.env.api_host}/config/game/get`)
+
+    games.value = response.data.map((game) => game.name)
   } catch (error) {
     console.error('Error fetching expansion:', error)
   }
@@ -385,6 +437,7 @@ async function openEditDialog(card) {
     dialogRarity.value = response.data[0].rarity
     dialogExpansion.value = response.data[0].expansion
     dialogPrice.value = response.data[0].price
+    dialogGame.value = response.data[0].game
     dialogQuantity.value = response.data[0].quantity
     dialogId.value = card._id
   } catch (error) {
@@ -402,6 +455,7 @@ async function saveEditCard() {
       rarity: dialogRarity.value,
       expansion: dialogExpansion.value,
       price: dialogPrice.value,
+      game: dialogGame.value,
       quantity: dialogQuantity.value,
     })
     Notify.create({
@@ -419,6 +473,7 @@ async function saveEditCard() {
     dialogRarity.value = ''
     dialogExpansion.value = ''
     dialogPrice.value = ''
+    dialogGame.value = ''
     dialogQuantity.value = ''
     dialogImageFile.value = null
     addDialog.value = false
@@ -435,6 +490,7 @@ function openDeleteCard(card) {
   deleteDialog.value = true
   dialogName.value = card.name
   dialogRarity.value = card.rarity
+  dialogGame.value = card.game
   dialogId.value = card._id
 }
 
@@ -462,6 +518,7 @@ async function deleteCard() {
 onMounted(() => {
   getCards()
   getRarities()
+  getGames()
   getExpansions()
 })
 </script>

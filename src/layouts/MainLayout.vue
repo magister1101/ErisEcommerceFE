@@ -14,9 +14,15 @@
 
         <!-- Center Nav: Only visible on md and up -->
         <div class="row justify-center q-gutter-xl items-center gt-md q-md-flex">
-          <span class="text-h6 cursor-pointer" @click="$router.push('/products')">Products</span>
-          <span class="text-h6 cursor-pointer" @click="$router.push('/preOrders')">Pre-Orders</span>
-          <span class="text-h6 cursor-pointer" @click="$router.push('/others')">Others</span>
+          <span class="text-h6 cursor-pointer menu-items" @click="$router.push('/cards')"
+            >Cards</span
+          >
+          <span class="text-h6 cursor-pointer menu-items" @click="$router.push('/preOrders')"
+            >Pre-Orders</span
+          >
+          <span class="text-h6 cursor-pointer menu-items" @click="$router.push('/others')"
+            >Others</span
+          >
         </div>
 
         <!-- Right: Account, Cart, and Mobile Menu -->
@@ -44,7 +50,7 @@
       <!-- Mobile Nav Slide Down -->
       <q-slide-transition>
         <div v-show="mobileMenu" class="column q-pa-md q-gutter-sm lt-lg">
-          <span class="text-subtitle1 cursor-pointer" @click="navigate('/products')">Products</span>
+          <span class="text-subtitle1 cursor-pointer" @click="navigate('/products')">Cards</span>
           <span class="text-subtitle1 cursor-pointer" @click="navigate('/preOrders')"
             >Pre-Orders</span
           >
@@ -84,6 +90,9 @@ function navigate(path) {
 
 .brand-name
   font-size: 1.25rem
+
+.menu-items:hover
+  color: #bbbbbb
 
 @media (max-width: 768px), (max-height: 768px)
   .brand-name

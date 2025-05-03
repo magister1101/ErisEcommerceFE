@@ -111,7 +111,7 @@ async function login() {
         position: 'bottom',
         timeout: 2000,
       })
-      router.replace('/admin/ygo/cardList/')
+      router.replace('/admin/cardList/')
     }
   } catch (error) {
     console.log(error)
@@ -132,7 +132,7 @@ async function validate() {
     const valid = response.valid
 
     if (valid) {
-      router.replace('/admin/ygo/cardList/')
+      router.replace('/admin/cardList/')
     } else {
       return
     }

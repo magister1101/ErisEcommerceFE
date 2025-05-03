@@ -26,8 +26,8 @@
           <q-btn
             flat
             dense
-            label="Products"
-            @click="$router.push('/products')"
+            label="Cards"
+            @click="$router.push('/cards')"
             class="menuBtn q-mt-lg"
             size="sm"
           />

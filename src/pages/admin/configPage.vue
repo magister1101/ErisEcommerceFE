@@ -47,18 +47,18 @@
         <!-- Second Table -->
         <div class="col-12 col-md-6">
           <q-table
-            :rows="filteredRarity"
-            :columns="columnsRarity"
+            :rows="filteredGame"
+            :columns="columnsGame"
             row-key="_id"
-            :pagination="paginationRarity"
+            :pagination="paginationGame"
             class="q-pa-none q-mb-sm rarityTable"
           >
             <template v-slot:top-left>
               <q-btn
                 color="primary"
                 icon="add"
-                label="Add Rarity"
-                @click="addRarityDialog = !addRarityDialog"
+                label="Add Game"
+                @click="addGameDialog = !addGameDialog"
               />
             </template>
 
@@ -76,8 +76,8 @@
               <q-td :props="props">
                 <q-btn
                   color="negative"
-                  label="MODIFY"
-                  @click="openDeleteCardExpansion(props.row)"
+                  label="DELETE"
+                  @click="openDeleteCardGame(props.row)"
                   class="q-ma-sm"
                   style="width: 100px"
                 />
@@ -154,7 +154,7 @@
       <q-card bordered style="border-radius: 10px; width: 100%">
         <q-form @submit.prevent="saveExpansion" class="q-mx-xl">
           <q-card-section>
-            <p class="text-h5">Create a new expansion - {{ game }}</p>
+            <p class="text-h5">Create a new expansion</p>
           </q-card-section>
 
           <div>
@@ -192,7 +192,7 @@
       <q-card bordered style="border-radius: 10px; width: 100%">
         <q-form @submit.prevent="editExpansion" class="q-mx-xl">
           <q-card-section>
-            <p class="text-h5">Create a new expansion - {{ game }}</p>
+            <p class="text-h5">Create a new expansion</p>
           </q-card-section>
 
           <div>
@@ -235,12 +235,33 @@
       </q-card>
     </q-dialog>
 
+    <!-- delete game dialog -->
+    <q-dialog v-model="deleteGameDialog" persistent>
+      <q-card bordered class="delete_card_dialog" style="border-radius: 10px">
+        <q-card-section>
+          <p>Delete {{ dialogName }} - {{ dialogCode }}?</p>
+        </q-card-section>
+        <q-card-action>
+          <q-btn flat label="Cancel" v-close-popup color="negative" class="q-px-md" />
+          <q-btn
+            type="submit"
+            flat
+            color="positive"
+            label="Confirm"
+            class="q-px-md"
+            :loading="deleteLoading"
+            @click="deleteGame()"
+          />
+        </q-card-action>
+      </q-card>
+    </q-dialog>
+
     <!-- add rarity dialog -->
     <q-dialog v-model="addRarityDialog" persistent>
       <q-card bordered style="border-radius: 10px; width: 100%">
         <q-form @submit.prevent="saveRarity" class="q-mx-xl">
           <q-card-section>
-            <p class="text-h5">Create a new rarity - {{ game }}</p>
+            <p class="text-h5">Create a new Rarity</p>
           </q-card-section>
 
           <div>
@@ -256,6 +277,33 @@
               label="Save"
               class="q-px-md"
               :loading="addRarityDialogLoading"
+            />
+          </q-card-action>
+        </q-form>
+      </q-card>
+    </q-dialog>
+
+    <!-- add Game Dialog -->
+    <q-dialog v-model="addGameDialog" persistent>
+      <q-card bordered style="border-radius: 10px; width: 100%">
+        <q-form @submit.prevent="saveGame" class="q-mx-xl">
+          <q-card-section>
+            <p class="text-h5">Create a new Game</p>
+          </q-card-section>
+
+          <div>
+            <q-input v-model="dialogName" label="Name" filled required />
+            <q-input v-model="dialogCode" label="Code" filled required mask="AAAAA" />
+          </div>
+          <q-card-action>
+            <q-btn flat label="Cancel" v-close-popup color="negative" class="q-px-md" />
+            <q-btn
+              type="submit"
+              flat
+              color="positive"
+              label="Save"
+              class="q-px-md"
+              :loading="addGameDialogLoading"
             />
           </q-card-action>
         </q-form>
@@ -292,7 +340,6 @@ import { useRoute } from 'vue-router'
 import { uploadToCloud } from 'src/components/cloudinaryUtility'
 
 const route = useRoute()
-const game = route.params.game
 
 // Refs
 const dialogId = ref('')
@@ -303,15 +350,19 @@ const dialogImageFile = ref(null)
 const expansions = ref([])
 const paginationExpansion = ref({ rowsPerPage: 5 })
 const paginationRarity = ref({ rowsPerPage: 5 })
+const paginationGame = ref({ rowsPerPage: 5 })
 const searchQuery = ref('')
 
 const rarities = ref([])
+const games = ref([])
 
 // Dialog states
 const addExpansionDialog = ref(false)
 const editExpansionDialog = ref(false)
 const deleteExpansionDialog = ref(false)
+const deleteGameDialog = ref(false)
 const addRarityDialog = ref(false)
+const addGameDialog = ref(false)
 const deleteRarityDialog = ref(false)
 
 // Loading states
@@ -319,7 +370,7 @@ const addLoading = ref(false)
 const editLoading = ref(false)
 const deleteLoading = ref(false)
 const addRarityDialogLoading = ref(false)
-const deleteRarityDialogLoading = ref(false)
+const addGameDialogLoading = ref(false)
 
 // Columns
 const columnsExpansion = [
@@ -330,6 +381,12 @@ const columnsExpansion = [
 ]
 
 const columnsRarity = [
+  { name: 'name', label: 'Name', align: 'left', field: 'name', sortable: true },
+  { name: 'code', label: 'Code', align: 'left', field: 'code', sortable: true },
+  { name: 'actions', label: 'Actions', align: 'center', field: 'actions' },
+]
+
+const columnsGame = [
   { name: 'name', label: 'Name', align: 'left', field: 'name', sortable: true },
   { name: 'code', label: 'Code', align: 'left', field: 'code', sortable: true },
   { name: 'actions', label: 'Actions', align: 'center', field: 'actions' },
@@ -348,8 +405,10 @@ function closeDialogs() {
   addExpansionDialog.value = false
   editExpansionDialog.value = false
   deleteExpansionDialog.value = false
+  deleteGameDialog.value = false
   addRarityDialog.value = false
   deleteRarityDialog.value = false
+  addGameDialog.value = false
   resetDialogFields()
 }
 
@@ -373,10 +432,19 @@ const filteredRarity = computed(() => {
       )
 })
 
+const filteredGame = computed(() => {
+  const query = searchQuery.value.toLowerCase()
+  return !query
+    ? games.value
+    : games.value.filter(({ name, code, series = '', rarity = '' }) =>
+        [name, code].some((field) => field.toLowerCase().includes(query)),
+      )
+})
+
 async function getExpansion() {
   try {
     const { data } = await axios.get(
-      `${process.env.api_host}/config/expansion/get?game=${game}&isArchived=false`,
+      `${process.env.api_host}/config/expansion/get?isArchived=false`,
     )
     expansions.value = data
   } catch (error) {
@@ -392,7 +460,6 @@ async function saveExpansion() {
       name: dialogName.value,
       code: dialogCode.value,
       file: imageUrl,
-      game,
     })
   } catch (error) {
     console.error('Save Error:', error)
@@ -443,6 +510,13 @@ function openDeleteCardExpansion(card) {
   deleteExpansionDialog.value = true
 }
 
+function openDeleteCardGame(card) {
+  dialogId.value = card._id
+  dialogName.value = card.name
+  dialogCode.value = card.code
+  deleteGameDialog.value = true
+}
+
 async function deleteExpansion() {
   deleteLoading.value = true
   try {
@@ -459,15 +533,38 @@ async function deleteExpansion() {
   }
 }
 
+async function deleteGame() {
+  deleteLoading.value = true
+  try {
+    await axios.post(`${process.env.api_host}/config/game/update/${dialogId.value}`, {
+      isArchived: true,
+    })
+  } catch (err) {
+    console.error('Delete Error:', err)
+  } finally {
+    closeDialogs()
+    await sleep(300)
+    getGame()
+    deleteLoading.value = false
+  }
+}
+
 // EXPANSIONS - end
 // RARITY - start
 
 async function getRarity() {
   try {
-    const { data } = await axios.get(
-      `${process.env.api_host}/config/rarity/get?game=${game}&isArchived=false`,
-    )
+    const { data } = await axios.get(`${process.env.api_host}/config/rarity/get?isArchived=false`)
     rarities.value = data
+  } catch (error) {
+    console.error('Error fetching rarity:', error)
+  }
+}
+
+async function getGame() {
+  try {
+    const { data } = await axios.get(`${process.env.api_host}/config/game/get?isArchived=false`)
+    games.value = data
   } catch (error) {
     console.error('Error fetching rarity:', error)
   }
@@ -481,7 +578,6 @@ async function saveRarity() {
     await axios.post(`${process.env.api_host}/config/rarity/create`, {
       name: ucName,
       code: ucCode,
-      game,
     })
   } catch (error) {
     console.error('Save Error:', error)
@@ -490,6 +586,25 @@ async function saveRarity() {
     await sleep(300)
     getRarity()
     addLoading.value = false
+  }
+}
+
+async function saveGame() {
+  addGameDialogLoading.value = true
+  try {
+    const ucName = dialogName.value.toUpperCase()
+    const ucCode = dialogCode.value.toUpperCase()
+    await axios.post(`${process.env.api_host}/config/game/create`, {
+      name: ucName,
+      code: ucCode,
+    })
+  } catch (error) {
+    console.error('Save Error:', error)
+  } finally {
+    closeDialogs()
+    await sleep(300)
+    getGame()
+    addGameDialogLoading.value = false
   }
 }
 
@@ -522,6 +637,7 @@ async function deleteRarity() {
 onMounted(() => {
   getExpansion()
   getRarity()
+  getGame()
 })
 </script>
 
