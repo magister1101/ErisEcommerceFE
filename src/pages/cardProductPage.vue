@@ -2,7 +2,7 @@
   <q-page class="q-pa-md">
     <div class="row q-col-gutter-lg">
       <!-- Filters: Left Side -->
-      <div class="col-12 col-md-2">
+      <div class="col-12 col-md-3 col-lg-2">
         <div class="q-pa-md">
           <q-input
             v-model="searchQuery"

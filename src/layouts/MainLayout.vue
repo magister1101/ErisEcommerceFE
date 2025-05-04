@@ -50,7 +50,7 @@
       <!-- Mobile Nav Slide Down -->
       <q-slide-transition>
         <div v-show="mobileMenu" class="column q-pa-md q-gutter-sm lt-lg">
-          <span class="text-subtitle1 cursor-pointer" @click="navigate('/products')">Cards</span>
+          <span class="text-subtitle1 cursor-pointer" @click="navigate('/cards')">Cards</span>
           <span class="text-subtitle1 cursor-pointer" @click="navigate('/preOrders')"
             >Pre-Orders</span
           >

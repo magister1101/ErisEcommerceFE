@@ -89,7 +89,7 @@ async function login() {
   loading.value = true
   try {
     const response = await axios.post(
-      `${process.env.api_host}/users/login`,
+      `${process.env.api_host}/users/loginAdmin`,
       {
         username: username.value,
         password: password.value,

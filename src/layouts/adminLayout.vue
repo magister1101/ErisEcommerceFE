@@ -47,6 +47,7 @@ import { ref, onMounted } from 'vue'
 import { Notify } from 'quasar'
 import { useRouter } from 'vue-router'
 import { validation } from '../components/adminViewerUtility.js'
+import { roundLeaderboard } from '@quasar/extras/material-icons-round'
 
 const drawer = ref(false)
 const router = useRouter()
@@ -89,7 +90,10 @@ function logout() {
 async function validate() {
   try {
     const response = await validation()
-    viewer.value = response.user
+    viewer.value = response
+    if (!viewer.value.valid || !viewer.value.user.isAdmin) {
+      router.push('/secret/')
+    }
   } catch (error) {
     console.log(error)
     Notify.create({
