@@ -449,6 +449,42 @@ async function clearDialogs() {
   }
 }
 
+// async function getCards() {
+//   tableLoading.value = true
+
+//   try {
+//     const response = await axios.get(`${process.env.api_host}/cards?isArchived=false`)
+//     const fetchedCards = response.data
+
+//     for (const card of fetchedCards) {
+//       // Only attempt to scrape if it's a preorder and has a URL
+//       if (card.isPreorder && card.url) {
+//         try {
+//           const scrapedData = await scrape(card.url)
+
+//           if (scrapedData) {
+//             // Only update price if it's valid and current price is 0
+//             if (!isNaN(scrapedData.price) && card.price === 0) {
+//               card.price = scrapedData.price
+//             }
+
+//             // Optionally update stock if you want to use/display it
+//             card.quantity = !isNaN(scrapedData.stock) ? scrapedData.stock : 0
+//           }
+//         } catch (err) {
+//           console.error(`Failed to scrape price for ${card.name}:`, err)
+//         }
+//       }
+//     }
+
+//     cards.value = fetchedCards
+//   } catch (error) {
+//     console.error('Error fetching cards:', error)
+//   } finally {
+//     tableLoading.value = false
+//   }
+// }
+
 async function getCards() {
   tableLoading.value = true
 
@@ -457,23 +493,10 @@ async function getCards() {
     const fetchedCards = response.data
 
     for (const card of fetchedCards) {
-      // Only attempt to scrape if it's a preorder and has a URL
       if (card.isPreorder && card.url) {
-        try {
-          const scrapedData = await scrape(card.url)
-
-          if (scrapedData) {
-            // Only update price if it's valid and current price is 0
-            if (!isNaN(scrapedData.price) && card.price === 0) {
-              card.price = scrapedData.price
-            }
-
-            // Optionally update stock if you want to use/display it
-            card.quantity = !isNaN(scrapedData.stock) ? scrapedData.stock : 0
-          }
-        } catch (err) {
-          console.error(`Failed to scrape price for ${card.name}:`, err)
-        }
+        //Don't Display Price and Stocks, limited Scraping API
+        card.price = 'YuYu-Tei Price * 0.5  '
+        card.quantity = 'YuYu-Tei Stocks'
       }
     }
 
