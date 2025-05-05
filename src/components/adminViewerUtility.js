@@ -20,10 +20,6 @@ export async function validation() {
 
   } catch (error) {
     console.log(error)
-    Notify.create({
-      message: 'validation Failed',
-      type: 'negative',
-    })
     localStorage.clear()
     return false
 

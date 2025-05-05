@@ -62,13 +62,13 @@
       <q-card bordered style="border-radius: 10px; width: 100%">
         <q-form @submit.prevent="saveCard" class="q-mx-xl">
           <q-card-section>
-            <p class="text-h5">Create a new card - {{ game }}</p>
+            <p class="text-h5">Create a new card</p>
           </q-card-section>
 
           <div>
-            <q-input class="q-pb-sm" v-model="dialogName" label="Name" filled required />
-            <q-input class="q-pb-sm" v-model="dialogCode" label="Code" filled required />
-            <q-input class="q-pb-sm" v-model="dialogSeries" label="Series" filled required />
+            <q-input class="q-pb-sm" v-model="dialogName" label="Name" filled required dense />
+            <q-input class="q-pb-sm" v-model="dialogCode" label="Code" filled required dense />
+            <q-input class="q-pb-sm" v-model="dialogSeries" label="Series" filled required dense />
             <q-select
               class="q-pb-sm"
               v-model="dialogRarity"
@@ -76,6 +76,7 @@
               label="Rarity"
               filled
               required
+              dense
             />
             <q-select
               class="q-pb-sm"
@@ -84,6 +85,7 @@
               label="Game"
               filled
               required
+              dense
             />
             <q-select
               class="q-pb-sm"
@@ -92,22 +94,48 @@
               label="Expansion"
               filled
               required
+              dense
             />
-            <q-input
+            <q-select
               class="q-pb-sm"
-              v-model="dialogPrice"
-              label="Price"
-              type="number"
+              v-model="dialogIsPreorder"
+              :options="preorders"
+              label="PreOrder?"
+              emit-value
               filled
               required
+              dense
             />
             <q-input
+              v-if="dialogIsPreorder === true"
+              class="q-pb-sm"
+              v-model="dialogUrl"
+              label="YYT-URL"
+              filled
+              required
+              dense
+            />
+
+            <q-input
+              v-if="dialogIsPreorder === false"
               class="q-pb-sm"
               v-model="dialogQuantity"
               label="Quantity"
               type="number"
               filled
               required
+              dense
+            />
+
+            <q-input
+              v-if="dialogIsPreorder === false"
+              class="q-pb-sm"
+              v-model="dialogPrice"
+              label="Price"
+              type="number"
+              filled
+              required
+              dense
             />
             <q-file
               class="q-px-md"
@@ -115,6 +143,7 @@
               accept="image/*"
               borderless
               label="Upload Profile Image"
+              dense
             >
               <template #append>
                 <q-icon name="upload"></q-icon>
@@ -131,14 +160,7 @@
               class="q-px-md"
               :loading="dialogLoading"
             />
-            <q-btn
-              flat
-              color="info"
-              label="Clear"
-              class="q-px-md"
-              :loading="dialogLoading"
-              @click="clearDialogs()"
-            />
+            <q-btn flat color="info" label="Clear" class="q-px-md" @click="clearDialogs()" />
           </q-card-action>
         </q-form>
       </q-card>
@@ -153,9 +175,9 @@
           </q-card-section>
 
           <div>
-            <q-input class="q-pb-sm" v-model="dialogName" label="Name" filled required />
-            <q-input class="q-pb-sm" v-model="dialogCode" label="Code" filled required />
-            <q-input class="q-pb-sm" v-model="dialogSeries" label="Series" filled required />
+            <q-input class="q-pb-sm" v-model="dialogName" label="Name" filled required dense />
+            <q-input class="q-pb-sm" v-model="dialogCode" label="Code" filled required dense />
+            <q-input class="q-pb-sm" v-model="dialogSeries" label="Series" filled required dense />
             <q-select
               class="q-pb-sm"
               v-model="dialogRarity"
@@ -163,6 +185,7 @@
               label="Rarity"
               filled
               required
+              dense
             />
             <q-select
               class="q-pb-sm"
@@ -171,42 +194,70 @@
               label="Game"
               filled
               required
+              dense
             />
             <q-select
               class="q-pb-sm"
-              :options="expansions"
               v-model="dialogExpansion"
+              :options="expansions"
               label="Expansion"
               filled
               required
+              dense
             />
-            <q-input
+            <q-select
               class="q-pb-sm"
-              v-model="dialogPrice"
-              label="Price"
-              type="number"
+              v-model="dialogIsPreorder"
+              :options="preorders"
+              label="PreOrder?"
+              emit-value
               filled
               required
+              dense
             />
             <q-input
+              v-if="dialogIsPreorder === true"
+              class="q-pb-sm"
+              v-model="dialogUrl"
+              label="YYT-URL"
+              filled
+              required
+              dense
+            />
+
+            <q-input
+              v-if="dialogIsPreorder === false"
               class="q-pb-sm"
               v-model="dialogQuantity"
               label="Quantity"
               type="number"
               filled
               required
+              dense
             />
-            <!-- <q-file
+
+            <q-input
+              v-if="dialogIsPreorder === false"
+              class="q-pb-sm"
+              v-model="dialogPrice"
+              label="Price"
+              type="number"
+              filled
+              required
+              dense
+            />
+            <q-file
               class="q-px-md"
               v-model="dialogImageFile"
               accept="image/*"
               borderless
               label="Upload Profile Image"
+              dense
             >
               <template #append>
                 <q-icon name="upload"></q-icon>
               </template>
-            </q-file> -->
+            </q-file>
           </div>
           <q-card-action>
             <q-btn
@@ -277,8 +328,10 @@ const dialogCode = ref('')
 const dialogSeries = ref('')
 const dialogRarity = ref('')
 const dialogExpansion = ref('')
-const dialogPrice = ref('')
-const dialogQuantity = ref('')
+const dialogPrice = ref(0)
+const dialogQuantity = ref(0)
+const dialogIsPreorder = ref(false)
+const dialogUrl = ref('')
 const dialogImageFile = ref(null)
 const dialogGame = ref('')
 const dialogId = ref('')
@@ -287,6 +340,10 @@ const cards = ref([]) // This will store the cards data
 
 //options
 const expansions = ref([])
+const preorders = ref([
+  { label: 'True', value: true },
+  { label: 'False', value: false },
+])
 const rarities = ref([])
 const games = ref([])
 
@@ -301,6 +358,7 @@ const columns = [
   { name: 'code', label: 'Code', align: 'left', field: 'code', sortable: true },
   { name: 'series', label: 'Series', align: 'left', field: 'series' },
   { name: 'expansion', label: 'Expansion', align: 'left', field: 'expansion' },
+  { name: 'Is Pre-Order', label: 'Is Pre-Order', align: 'left', field: 'isPreorder' },
   { name: 'rarity', label: 'Rarity', align: 'left', field: 'rarity' },
   { name: 'price', label: 'Price', align: 'right', field: 'price' },
   { name: 'quantity', label: 'Quantity', align: 'right', field: 'quantity' },
@@ -337,6 +395,8 @@ async function saveCard() {
       expansion: dialogExpansion.value,
       price: dialogPrice.value,
       quantity: dialogQuantity.value,
+      isPreorder: dialogIsPreorder.value,
+      url: dialogUrl.value,
       file: imageUrl,
       game: dialogGame.value,
     })
@@ -361,6 +421,8 @@ async function resetDialogs() {
     dialogExpansion.value = ''
     dialogPrice.value = ''
     dialogQuantity.value = ''
+    dialogIsPreorder.value = false
+    dialogUrl.value = ''
     dialogImageFile.value = null
     dialogGame.value = ''
     addDialog.value = false
@@ -378,6 +440,8 @@ async function clearDialogs() {
     dialogExpansion.value = ''
     dialogPrice.value = ''
     dialogQuantity.value = ''
+    dialogIsPreorder.value = false
+    dialogUrl.value = ''
     dialogImageFile.value = null
     dialogGame.value = ''
   } catch (err) {
@@ -387,13 +451,50 @@ async function clearDialogs() {
 
 async function getCards() {
   tableLoading.value = true
+
   try {
     const response = await axios.get(`${process.env.api_host}/cards?isArchived=false`)
-    cards.value = response.data
+    const fetchedCards = response.data
+
+    for (const card of fetchedCards) {
+      // Only attempt to scrape if it's a preorder and has a URL
+      if (card.isPreorder && card.url) {
+        try {
+          const scrapedData = await scrape(card.url)
+
+          if (scrapedData) {
+            // Only update price if it's valid and current price is 0
+            if (!isNaN(scrapedData.price) && card.price === 0) {
+              card.price = scrapedData.price
+            }
+
+            // Optionally update stock if you want to use/display it
+            card.quantity = !isNaN(scrapedData.stock) ? scrapedData.stock : 0
+          }
+        } catch (err) {
+          console.error(`Failed to scrape price for ${card.name}:`, err)
+        }
+      }
+    }
+
+    cards.value = fetchedCards
   } catch (error) {
     console.error('Error fetching cards:', error)
   } finally {
     tableLoading.value = false
+  }
+}
+
+async function scrape(url) {
+  try {
+    const response = await axios.post(`${process.env.api_host}/cards/scrapePrice`, {
+      url: url,
+    })
+
+    return response.data // Should contain { price, stock }
+  } catch (err) {
+    console.error('Scrape error:', err)
+    return null
   }
 }
 
@@ -438,6 +539,8 @@ async function openEditDialog(card) {
     dialogExpansion.value = response.data[0].expansion
     dialogPrice.value = response.data[0].price
     dialogGame.value = response.data[0].game
+    dialogIsPreorder.value = response.data[0].isPreorder
+    dialogUrl.value = response.data[0].url
     dialogQuantity.value = response.data[0].quantity
     dialogId.value = card._id
   } catch (error) {
@@ -457,6 +560,8 @@ async function saveEditCard() {
       price: dialogPrice.value,
       game: dialogGame.value,
       quantity: dialogQuantity.value,
+      isPreorder: dialogIsPreorder.value,
+      url: dialogUrl.value,
     })
     Notify.create({
       type: 'positive',
@@ -467,16 +572,7 @@ async function saveEditCard() {
     editDialog.value = false
 
     // Reset form after successful submission
-    dialogName.value = ''
-    dialogCode.value = ''
-    dialogSeries.value = ''
-    dialogRarity.value = ''
-    dialogExpansion.value = ''
-    dialogPrice.value = ''
-    dialogGame.value = ''
-    dialogQuantity.value = ''
-    dialogImageFile.value = null
-    addDialog.value = false
+    clearDialogs()
 
     getCards()
   } catch (error) {
