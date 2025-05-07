@@ -95,7 +95,7 @@
 
                       <div
                         class="row items-center justify-between bottomDiv"
-                        style="bottom: 0; left: 0; right: 0"
+                        style="bottom: 0; left: 0; right: 0; margin-top: auto"
                       >
                         <div class="text-bold text-primary">{{ card.quantity }} in Stock</div>
                         <div class="text-bold text-accent text-h6">
@@ -222,7 +222,9 @@ const totalPages = computed(() => Math.ceil(flatSortedCards.value.length / items
 async function getCards() {
   tableLoading.value = true
   try {
-    const response = await axios.get(`${process.env.api_host}/cards?isArchived=false`)
+    const response = await axios.get(
+      `${process.env.api_host}/cards?isArchived=false&isPreorder=false`,
+    )
     cards.value = response.data
     filteredCards.value = response.data
   } catch (error) {

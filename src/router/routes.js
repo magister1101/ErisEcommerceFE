@@ -6,7 +6,9 @@ const routes = [
     children: [
       { path: '', component: () => import('pages/IndexPage.vue') },
       { path: 'highlight/:game', component: () => import('pages/highlightPage.vue') },
-      { path: 'cards', component: () => import('src/pages/cardProductPage.vue') },
+      { path: 'cards', component: () => import('src/pages/menu/cardProductPage.vue') },
+      { path: 'preOrders', component: () => import('src/pages/menu/cardProductPreOrderPage.vue') },
+      { path: 'others', component: () => import('src/pages/menu/otherProductPage.vue') },
     ]
   },
   {
