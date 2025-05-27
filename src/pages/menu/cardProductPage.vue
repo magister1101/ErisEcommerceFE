@@ -62,7 +62,7 @@
                 >
                   <q-card
                     clickable
-                    @click="goToCard(card._id)"
+                    @click="dialogCart(card._id)"
                     flat
                     bordered
                     class="q-pa-sm row no-wrap items-start card-hover"
@@ -126,6 +126,22 @@
         </div>
       </div>
     </div>
+
+    <q-dialog v-model="addToCartDialog" persistent>
+      <q-card>
+        <q-card-section class="row items-center q-pa-sm">
+          <q-icon name="warning" color="red" size="md" class="q-mr-sm" />
+          <div class="text-h6">Confirmation</div>
+        </q-card-section>
+
+        <q-card-section> Add to Cart? </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Yes" color="primary " @click="addToCart()" v-close-popup />
+          <q-btn flat label="No, Cancel" color="negative" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -133,6 +149,8 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
+import { mdiCarChildSeat } from '@quasar/extras/mdi-v4'
+import { Notify } from 'quasar'
 
 const router = useRouter()
 
@@ -143,6 +161,10 @@ const searchQuery = ref('')
 const selectedGame = ref(null)
 const selectedRarity = ref(null)
 const selectedExpansion = ref(null)
+const addToCartDialog = ref(false)
+
+const cardToCart = ref(null)
+const cartQuantity = ref(1)
 
 const itemsPerPage = ref(24)
 const currentPage = ref(1)
@@ -234,11 +256,40 @@ async function getCards() {
   }
 }
 
-async function goToCard(cardId) {
+async function dialogCart(cardId) {
   try {
-    await router.push(`/card/${cardId}`)
+    addToCartDialog.value = true
+    cardToCart.value = cardId
+    cartQuantity.value = 1
   } catch (error) {
     console.error('Error redirecting to card:', error)
+  }
+}
+
+async function addToCart() {
+  try {
+    const token = localStorage.getItem('authToken')
+    console.log(cardToCart.value)
+    const response = await axios.post(
+      `${process.env.api_host}/users/addToCart`,
+      {
+        productId: cardToCart.value,
+        quantity: cartQuantity.value,
+      },
+      {
+        headers: {
+          Authorization: token,
+        },
+      },
+    )
+    Notify.create({
+      message: 'Card added to cart',
+      color: 'positive',
+      icon: mdiCarChildSeat,
+      timeout: 2000,
+    })
+  } catch (error) {
+    console.error('Error adding to cart:', error)
   }
 }
 

@@ -32,7 +32,7 @@
             round
             dense
             icon="account_circle"
-            @click="$router.push('/account')"
+            @click="$router.push('/myProfile')"
             class="q-hidden q-md-inline"
           />
           <q-btn
