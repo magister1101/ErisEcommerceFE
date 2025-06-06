@@ -4,6 +4,7 @@
       :rows="orders"
       :columns="columns"
       row-key="_id"
+      :loading="tableLoading"
       flat
       bordered
       v-model:pagination="pagination"
@@ -99,6 +100,8 @@ import { date } from 'quasar'
 
 const orders = ref([])
 
+const tableLoading = ref(false)
+
 const pagination = ref({
   page: 1,
   rowsPerPage: 10,
@@ -121,10 +124,13 @@ function getStatusColor(status) {
 
 async function getOrders() {
   try {
+    tableLoading.value = true
     const res = await axios.get(`${process.env.api_host}/orders`)
     orders.value = res.data
   } catch (err) {
     console.error('Failed to load orders:', err)
+  } finally {
+    tableLoading.value = false
   }
 }
 
