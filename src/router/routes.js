@@ -30,6 +30,7 @@ const routes = [
     children: [
       { path: 'cardList', component: () => import('pages/admin/cardList.vue') },
       { path: 'config', component: () => import('pages/admin/configPage.vue') },
+      { path: 'order', component: () => import('pages/admin/orderPage.vue') },
     ]
   },
 

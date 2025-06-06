@@ -64,6 +64,11 @@ const menuList = [
     icon: 'bolt',
     label: 'Config',
     to: '/admin/config',
+  },
+  {
+    icon: 'shopping_basket',
+    label: 'Orders',
+    to: '/admin/order',
     separator: true,
   },
 ]
