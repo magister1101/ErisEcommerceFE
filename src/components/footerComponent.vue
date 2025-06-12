@@ -39,14 +39,14 @@
             class="menuBtn"
             size="sm"
           />
-          <q-btn
+          <!-- <q-btn
             flat
             dense
             label="Others"
             @click="$router.push('/others')"
             class="menuBtn"
             size="sm"
-          />
+          /> -->
           <q-btn flat dense label="FAQ" @click="$router.push('/faq')" class="menuBtn" size="sm" />
           <q-btn
             flat

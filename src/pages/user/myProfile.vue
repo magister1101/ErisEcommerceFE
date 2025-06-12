@@ -13,6 +13,15 @@
             <q-badge color="primary" label="Username" class="q-mr-sm" />
             {{ user.username }}
           </div>
+          <div class="q-mt-sm">
+            <q-badge
+              color="red"
+              label="logout"
+              clicakble
+              @click="logout"
+              class="q-mr-sm q-pa-md cursor-pointer"
+            />
+          </div>
         </q-card>
       </div>
 
@@ -63,6 +72,9 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { Notify } from 'quasar'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const user = ref({})
 const orders = ref([])
@@ -75,10 +87,11 @@ async function fetchProfile() {
     user.value = response.data.user
   } catch (err) {
     console.error(err)
-    Notify.create({
-      type: 'negative',
-      message: 'Failed to load profile',
-    })
+    // Notify.create({
+    //   type: 'negative',
+    //   message: 'Failed to load profile',
+    // })
+    noUser()
   }
 
   fetchOrders()
@@ -91,16 +104,39 @@ async function fetchOrders() {
     const ordersRes = await axios.get(`${process.env.api_host}/orders/myOrders`, {
       headers: { Authorization: token },
     })
-    console.log(ordersRes)
 
-    orders.value = ordersRes.data
+    orders.value = ordersRes.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   } catch (err) {
     console.error(err)
+    // Notify.create({
+    //   type: 'negative',
+    //   message: 'Failed to load profile or orders',
+    // })
+  }
+}
+
+function logout() {
+  try {
     Notify.create({
+      message: 'Logout Success',
+      type: 'positive',
+      position: 'top',
+      timeout: 1000,
+    })
+    localStorage.clear()
+    router.go()
+    router.replace('/')
+  } catch (error) {
+    console.log(error)
+    Notify.create({
+      message: 'Logout Failed',
       type: 'negative',
-      message: 'Failed to load profile or orders',
     })
   }
+}
+
+function noUser() {
+  router.replace('/')
 }
 
 onMounted(async () => {

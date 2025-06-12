@@ -60,6 +60,21 @@
               ₱{{ (props.row.product.price * props.row.quantity).toFixed(2) }}
             </q-td>
           </template>
+
+          <!-- Remove Button -->
+          <template #body-cell-actions="props">
+            <q-td :props="props">
+              <q-btn
+                icon="delete"
+                color="negative"
+                flat
+                round
+                dense
+                @click="removeFromCart(props.row)"
+                title="Remove from Cart"
+              />
+            </q-td>
+          </template>
         </q-table>
 
         <!-- Order Form -->
@@ -156,6 +171,12 @@ const columns = [
     field: (row) => row.quantity * row.product.price,
     sortable: true,
   },
+  {
+    name: 'actions',
+    label: 'Actions',
+    align: 'center',
+    field: () => '',
+  },
 ]
 
 async function validate() {
@@ -192,7 +213,6 @@ async function fetchUserCart() {
     }
   } catch (err) {
     console.error(err)
-    Notify.create({ type: 'negative', message: 'Failed to load cart' })
   } finally {
     loading.value = false
   }
@@ -228,7 +248,7 @@ async function submitOrder() {
 
     const token = localStorage.getItem('authToken')
 
-    const response = await axios.post(`${process.env.api_host}/orders/createOrder`, orderPayload, {
+    await axios.post(`${process.env.api_host}/orders/createOrder`, orderPayload, {
       headers: {
         Authorization: token,
       },
@@ -247,6 +267,34 @@ async function submitOrder() {
     Notify.create({
       type: 'negative',
       message: error.response?.data?.message || 'Failed to create order',
+    })
+  }
+}
+
+async function removeFromCart(item) {
+  try {
+    const token = localStorage.getItem('authToken')
+
+    await axios.post(
+      `${process.env.api_host}/users/removeFromCart`,
+      {
+        productId: item.product._id,
+        quantity: item.quantity,
+      },
+      {
+        headers: {
+          Authorization: token,
+        },
+      },
+    )
+
+    Notify.create({ type: 'positive', message: 'Item removed from cart' })
+    await fetchUserCart()
+  } catch (error) {
+    console.error(error)
+    Notify.create({
+      type: 'negative',
+      message: error.response?.data?.message || 'Failed to remove item from cart',
     })
   }
 }

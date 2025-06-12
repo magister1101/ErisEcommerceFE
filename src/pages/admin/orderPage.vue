@@ -17,11 +17,20 @@
               <template #header>
                 <q-item-section>
                   <q-item-label>
+                    <q-badge class="q-mt-xs q-pa-sm" color="primary">Order #</q-badge>
                     {{ props.row.buyer.firstName.toUpperCase() }}
                     {{ props.row.buyer.lastName.toUpperCase() }}
                   </q-item-label>
+                  <q-item-label>
+                    <q-badge class="q-mt-xs q-pa-sm" color="accent">Order #</q-badge>
+                    {{ props.row._id }}</q-item-label
+                  >
                   <q-item-label caption>
-                    <q-badge :color="getStatusColor(props.row.status)" class="q-mt-xs" align="top">
+                    <q-badge
+                      :color="getStatusColor(props.row.status)"
+                      class="q-mt-xs q-pa-sm"
+                      align="top"
+                    >
                       {{ props.row.status }}
                     </q-badge>
                   </q-item-label>
@@ -84,21 +93,79 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="q-mt-sm text-right">
+                  <q-badge
+                    color="warning"
+                    label="UPDATE ORDER"
+                    clicakble
+                    @click="openUpdateDialog(props.row)"
+                    class="q-mr-sm q-pa-md cursor-pointer text-white text-weight-bold"
+                  />
+                </div>
               </q-card>
             </q-expansion-item>
           </q-td>
         </q-tr>
       </template>
     </q-table>
+
+    <q-dialog v-model="updateOrderDialog" persistent>
+      <q-card style="min-width: 400px">
+        <q-card-section>
+          <div class="text-h6">Update Order</div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section>
+          <q-select
+            v-model="selectedStatus"
+            :options="statusOptions"
+            label="Order Status"
+            dense
+            outlined
+          />
+          <q-select
+            v-model="selectedPayment"
+            :options="paymentOptions"
+            label="Payment Method"
+            dense
+            outlined
+            class="q-mt-md"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="grey" v-close-popup />
+          <q-btn
+            :loading="updateOrderLoading"
+            label="Save"
+            color="primary"
+            @click="submitOrderUpdate"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
-import { date } from 'quasar'
+import { date, Notify } from 'quasar'
 
 const orders = ref([])
+
+const orderId = ref('')
+const updateOrderDialog = ref(false)
+const updateOrderLoading = ref(false)
+
+const selectedStatus = ref('')
+const selectedPayment = ref('')
+
+const statusOptions = ['pending', 'paid', 'shipped', 'cancelled', 'completed']
+const paymentOptions = ['Cash on Delivery', 'GCash', 'Credit Card']
 
 const tableLoading = ref(false)
 
@@ -112,11 +179,13 @@ function getStatusColor(status) {
     case 'pending':
       return 'orange'
     case 'paid':
-      return 'green'
+      return 'info'
     case 'shipped':
       return 'primary'
     case 'cancelled':
       return 'red'
+    case 'completed':
+      return 'green'
     default:
       return 'grey'
   }
@@ -145,6 +214,44 @@ const columns = [
 
 function formatDate(datetime) {
   return date.formatDate(datetime, 'YYYY-MM-DD HH:mm')
+}
+
+function openUpdateDialog(order) {
+  orderId.value = order._id
+  selectedStatus.value = order.status
+  selectedPayment.value = order.paymentMethod
+
+  updateOrderDialog.value = true
+}
+
+async function submitOrderUpdate() {
+  try {
+    updateOrderLoading.value = true
+    const token = localStorage.getItem('authToken')
+    const response = await axios.post(
+      `${process.env.api_host}/orders/updateOrder/${orderId.value}`,
+      {
+        status: selectedStatus.value,
+        paymentMethod: selectedPayment.value,
+      },
+      {
+        headers: {
+          Authorization: token,
+        },
+      },
+    )
+    Notify.create({
+      message: 'Order updated successfully',
+      color: 'positive',
+      textColor: 'white',
+    })
+  } catch (error) {
+    console.error('Failed to update order:', error)
+  } finally {
+    updateOrderDialog.value = false
+    updateOrderLoading.value = false
+    getOrders()
+  }
 }
 
 onMounted(() => {

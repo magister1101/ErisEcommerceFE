@@ -128,6 +128,7 @@ async function login() {
         position: 'bottom',
         timeout: 2000,
       })
+      router.go()
       router.replace('/cards')
     }
   } catch (error) {

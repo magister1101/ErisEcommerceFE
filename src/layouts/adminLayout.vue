@@ -82,7 +82,7 @@ function logout() {
       position: 'top',
       timeout: 1000,
     })
-    router.push('/secret/')
+    router.replace('/secret/')
   } catch (error) {
     console.log(error)
     Notify.create({
