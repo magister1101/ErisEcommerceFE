@@ -1,7 +1,38 @@
 <template>
   <q-page padding>
+    <!-- Filters -->
+    <div class="row q-col-gutter-md q-mb-md">
+      <div class="col-12 col-md-6">
+        <q-input
+          filled
+          v-model="filter"
+          label="Search Orders"
+          debounce="300"
+          :clearable="true"
+          placeholder="Search by name or order ID"
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </div>
+      <div class="col-12 col-md-4">
+        <q-select
+          filled
+          v-model="statusFilter"
+          :options="['All', ...statusOptions]"
+          label="Filter by Status"
+          emit-value
+          map-options
+          dense
+          clearable
+        />
+      </div>
+    </div>
+
+    <!-- Orders Table -->
     <q-table
-      :rows="orders"
+      :rows="filteredOrders"
       :columns="columns"
       row-key="_id"
       :loading="tableLoading"
@@ -17,18 +48,28 @@
               <template #header>
                 <q-item-section>
                   <q-item-label>
-                    <q-badge class="q-mt-xs q-pa-sm" color="primary">Order #</q-badge>
+                    <q-badge class="q-mt-xs q-pa-sm text-black text-weight-bold" color="info"
+                      >Customer</q-badge
+                    >
                     {{ props.row.buyer.firstName.toUpperCase() }}
                     {{ props.row.buyer.lastName.toUpperCase() }}
                   </q-item-label>
                   <q-item-label>
-                    <q-badge class="q-mt-xs q-pa-sm" color="accent">Order #</q-badge>
-                    {{ props.row._id }}</q-item-label
-                  >
+                    <q-badge class="q-mt-xs q-pa-sm text-black text-weight-bold" color="info"
+                      >Order #</q-badge
+                    >
+                    {{ props.row._id }}
+                  </q-item-label>
+                  <q-item-label>
+                    <q-badge class="q-mt-xs q-pa-sm text-black text-weight-bold" color="info"
+                      >Ordered At:</q-badge
+                    >
+                    {{ formatDate(props.row.createdAt) }}
+                  </q-item-label>
                   <q-item-label caption>
                     <q-badge
                       :color="getStatusColor(props.row.status)"
-                      class="q-mt-xs q-pa-sm"
+                      class="q-mt-xs q-pa-sm text-weight-bold"
                       align="top"
                     >
                       {{ props.row.status }}
@@ -98,7 +139,7 @@
                   <q-badge
                     color="warning"
                     label="UPDATE ORDER"
-                    clicakble
+                    clickable
                     @click="openUpdateDialog(props.row)"
                     class="q-mr-sm q-pa-md cursor-pointer text-white text-weight-bold"
                   />
@@ -110,6 +151,7 @@
       </template>
     </q-table>
 
+    <!-- Update Order Dialog -->
     <q-dialog v-model="updateOrderDialog" persistent>
       <q-card style="min-width: 400px">
         <q-card-section>
@@ -151,7 +193,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import { date, Notify } from 'quasar'
 
@@ -164,6 +206,9 @@ const updateOrderLoading = ref(false)
 const selectedStatus = ref('')
 const selectedPayment = ref('')
 
+const filter = ref('')
+const statusFilter = ref('All')
+
 const statusOptions = ['pending', 'paid', 'shipped', 'cancelled', 'completed']
 const paymentOptions = ['Cash on Delivery', 'GCash', 'Credit Card']
 
@@ -174,12 +219,21 @@ const pagination = ref({
   rowsPerPage: 10,
 })
 
+const columns = [
+  {
+    name: 'orders',
+    label: 'Orders',
+    align: 'left',
+    field: (row) => row.buyer.firstName + ' ' + row.buyer.lastName,
+  },
+]
+
 function getStatusColor(status) {
   switch (status) {
     case 'pending':
       return 'orange'
     case 'paid':
-      return 'info'
+      return 'yellow'
     case 'shipped':
       return 'primary'
     case 'cancelled':
@@ -203,24 +257,29 @@ async function getOrders() {
   }
 }
 
-const columns = [
-  {
-    name: 'orders',
-    label: 'Orders',
-    align: 'left',
-    field: (row) => row.buyer.firstName + ' ' + row.buyer.lastName,
-  },
-]
+const filteredOrders = computed(() => {
+  const search = filter.value.toLowerCase().trim()
+  const status = statusFilter.value
+
+  return orders.value.filter((order) => {
+    const fullName = `${order.buyer.firstName} ${order.buyer.lastName}`.toLowerCase()
+    const matchSearch =
+      !search || fullName.includes(search) || order._id.toLowerCase().includes(search)
+
+    const matchStatus = status === 'All' || order.status === status
+
+    return matchSearch && matchStatus
+  })
+})
 
 function formatDate(datetime) {
-  return date.formatDate(datetime, 'YYYY-MM-DD HH:mm')
+  return date.formatDate(datetime, 'MMMM DD, YYYY HH:mm')
 }
 
 function openUpdateDialog(order) {
   orderId.value = order._id
   selectedStatus.value = order.status
   selectedPayment.value = order.paymentMethod
-
   updateOrderDialog.value = true
 }
 
@@ -228,7 +287,7 @@ async function submitOrderUpdate() {
   try {
     updateOrderLoading.value = true
     const token = localStorage.getItem('authToken')
-    const response = await axios.post(
+    await axios.post(
       `${process.env.api_host}/orders/updateOrder/${orderId.value}`,
       {
         status: selectedStatus.value,

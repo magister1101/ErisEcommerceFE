@@ -128,17 +128,21 @@
     </div>
 
     <q-dialog v-model="addToCartDialog" persistent>
-      <q-card>
+      <q-card style="min-width: 300px">
         <q-card-section class="row items-center q-pa-sm">
-          <q-icon name="warning" color="red" size="md" class="q-mr-sm" />
-          <div class="text-h6">Confirmation</div>
+          <q-icon name="shopping_cart" color="primary" size="md" class="q-mr-sm" />
+          <div class="text-h6">Add to Cart</div>
         </q-card-section>
 
-        <q-card-section> Add to Cart? </q-card-section>
+        <q-separator />
 
-        <q-card-actions align="right">
-          <q-btn flat label="Yes" color="primary " @click="addToCart()" v-close-popup />
-          <q-btn flat label="No, Cancel" color="negative" v-close-popup />
+        <q-card-section class="q-pt-md">
+          <div class="text-body1">Are you sure you want to add this item to your cart?</div>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pa-sm">
+          <q-btn flat label="Cancel" color="grey" v-close-popup />
+          <q-btn flat label="Yes, Add" color="primary" @click="addToCart" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
