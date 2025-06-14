@@ -22,7 +22,7 @@
       <!-- Right Side (Menu) -->
       <div class="col-12 col-md-6 text-left q-pa-xl sides">
         <div class="menu-section">
-          <p class="text-h5 menu-title">MENU</p>
+          <div class="text-h5 menu-title">MENU</div>
           <q-btn
             flat
             dense
@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-// No changes needed here
+//
 </script>
 
 <style lang="sass" scoped>
