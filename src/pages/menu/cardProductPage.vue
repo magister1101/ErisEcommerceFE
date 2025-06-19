@@ -271,9 +271,22 @@ async function dialogCart(cardId) {
 }
 
 async function addToCart() {
+  const token = localStorage.getItem('authToken')
+  if (!token) {
+    router.push('/login')
+    return
+  }
   try {
-    const token = localStorage.getItem('authToken')
-    console.log(cardToCart.value)
+    const user = await axios.get(`${process.env.api_host}/users/viewer`, {
+      headers: {
+        Authorization: token,
+      },
+    })
+    console.log(user.data)
+    if (!user.data) {
+      router.push('/login')
+    }
+
     const response = await axios.post(
       `${process.env.api_host}/users/addToCart`,
       {

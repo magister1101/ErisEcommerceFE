@@ -8,7 +8,7 @@
           v-model="filter"
           label="Search Orders"
           debounce="300"
-          :clearable="true"
+          clearable
           placeholder="Search by name or order ID"
         >
           <template v-slot:append>
@@ -48,22 +48,22 @@
               <template #header>
                 <q-item-section>
                   <q-item-label>
-                    <q-badge class="q-mt-xs q-pa-sm text-black text-weight-bold" color="info"
-                      >Customer</q-badge
-                    >
+                    <q-badge class="q-mt-xs q-pa-sm text-black text-weight-bold" color="info">
+                      Customer
+                    </q-badge>
                     {{ props.row.buyer.firstName.toUpperCase() }}
                     {{ props.row.buyer.lastName.toUpperCase() }}
                   </q-item-label>
                   <q-item-label>
-                    <q-badge class="q-mt-xs q-pa-sm text-black text-weight-bold" color="info"
-                      >Order #</q-badge
-                    >
+                    <q-badge class="q-mt-xs q-pa-sm text-black text-weight-bold" color="info">
+                      Order #
+                    </q-badge>
                     {{ props.row._id }}
                   </q-item-label>
                   <q-item-label>
-                    <q-badge class="q-mt-xs q-pa-sm text-black text-weight-bold" color="info"
-                      >Ordered At:</q-badge
-                    >
+                    <q-badge class="q-mt-xs q-pa-sm text-black text-weight-bold" color="info">
+                      Ordered At:
+                    </q-badge>
                     {{ formatDate(props.row.createdAt) }}
                   </q-item-label>
                   <q-item-label caption>
@@ -102,15 +102,26 @@
                       <strong>Shipping Price:</strong> ₱{{ props.row.shippingPrice || 0 }}
                     </div>
                     <div><strong>Ordered At:</strong> {{ formatDate(props.row.createdAt) }}</div>
+
                     <div v-if="props.row.proofOfPayment" class="q-mt-sm">
                       <strong>Proof of Payment:</strong><br />
-                      <q-img
-                        :src="props.row.proofOfPayment"
-                        :width="80"
-                        :height="80"
-                        class="q-mt-xs rounded-borders"
-                        style="object-fit: cover"
-                      />
+                      <div
+                        class="q-mt-sm q-pa-sm rounded-borders"
+                        @click="showPreview(props.row.proofOfPayment)"
+                        style="
+                          width: 100%;
+                          max-width: 200px;
+                          background-color: #f5f5f5;
+                          border: 1px solid #ccc;
+                          cursor: pointer;
+                        "
+                      >
+                        <img
+                          :src="props.row.proofOfPayment"
+                          style="width: 100%; height: auto; display: block; object-fit: contain"
+                          alt="Proof of Payment"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -124,12 +135,13 @@
                         class="rounded-borders bg-grey-3"
                         style="object-fit: contain"
                       />
-
                       <div class="product-info q-mt-xs">
                         <strong>{{ item.product.name }}</strong
                         ><br />
                         Code: {{ item.product.code }}<br />
-                        Qty: {{ item.quantity }} x ₱{{ item.product.price }}
+                        series: {{ item.product.series }} <br />
+                        rarity: {{ item.product.rarity }} <br />
+                        Qty: {{ item.quantity }} x ₱{{ item.product.price }} <br />
                       </div>
                     </div>
                   </div>
@@ -150,6 +162,20 @@
         </q-tr>
       </template>
     </q-table>
+
+    <!-- Preview Image Dialog -->
+    <q-dialog v-model="previewDialog" persistent>
+      <q-card flat bordered style="width: 100%; max-width: 500px; max-height: 80vh; overflow: auto">
+        <q-card-section class="row justify-end">
+          <q-btn icon="close" flat dense round @click="previewDialog = false" />
+        </q-card-section>
+
+        <q-img
+          :src="previewImage"
+          style="width: 100%; height: auto; object-fit: contain; background-color: #f5f5f5"
+        />
+      </q-card>
+    </q-dialog>
 
     <!-- Update Order Dialog -->
     <q-dialog v-model="updateOrderDialog" persistent>
@@ -196,6 +222,9 @@
 import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import { date, Notify } from 'quasar'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const orders = ref([])
 
@@ -205,6 +234,9 @@ const updateOrderLoading = ref(false)
 
 const selectedStatus = ref('')
 const selectedPayment = ref('')
+
+const previewDialog = ref(false)
+const previewImage = ref('')
 
 const filter = ref('')
 const statusFilter = ref('All')
@@ -228,6 +260,11 @@ const columns = [
   },
 ]
 
+function showPreview(img) {
+  previewImage.value = img
+  previewDialog.value = true
+}
+
 function getStatusColor(status) {
   switch (status) {
     case 'pending':
@@ -246,8 +283,8 @@ function getStatusColor(status) {
 }
 
 async function getOrders() {
+  tableLoading.value = true
   try {
-    tableLoading.value = true
     const res = await axios.get(`${process.env.api_host}/orders`)
     orders.value = res.data
   } catch (err) {
@@ -287,6 +324,7 @@ async function submitOrderUpdate() {
   try {
     updateOrderLoading.value = true
     const token = localStorage.getItem('authToken')
+
     await axios.post(
       `${process.env.api_host}/orders/updateOrder/${orderId.value}`,
       {
@@ -299,17 +337,22 @@ async function submitOrderUpdate() {
         },
       },
     )
+
     Notify.create({
       message: 'Order updated successfully',
       color: 'positive',
       textColor: 'white',
     })
+
+    await getOrders()
+    orders.value = [...orders.value]
+
+    updateOrderDialog.value = false
   } catch (error) {
     console.error('Failed to update order:', error)
   } finally {
-    updateOrderDialog.value = false
     updateOrderLoading.value = false
-    getOrders()
+    router.go()
   }
 }
 
@@ -318,7 +361,7 @@ onMounted(() => {
 })
 </script>
 
-<style lang="sass" scoped>
+<style scoped lang="sass">
 .product-card
   width: 120px
   display: flex
@@ -326,10 +369,21 @@ onMounted(() => {
   align-items: center
   text-align: center
 
+  .product-card
+  width: 150px
+  display: flex
+  flex-direction: column
+  align-items: center
+  text-align: left
+  overflow: hidden
+
+  &:hover
+    overflow: visible
+
 .product-info
   font-size: 12px
-  overflow: hidden
-  text-overflow: ellipsis
-  white-space: nowrap
+  white-space: normal
+  text-overflow: initial
+  overflow: visible
   width: 100%
 </style>

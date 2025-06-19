@@ -15,9 +15,9 @@
         <!-- Center Nav: Only visible on md and up -->
         <div class="row justify-center q-gutter-xl items-center gt-md q-md-flex">
           <span class="text-h6 cursor-pointer menu-items" @click="navigate('/cards')">Cards</span>
-          <span class="text-h6 cursor-pointer menu-items" @click="navigate('/preOrders')"
+          <!-- <span class="text-h6 cursor-pointer menu-items" @click="navigate('/preOrders')"
             >Pre-Orders</span
-          >
+          > -->
           <!-- <span class="text-h6 cursor-pointer menu-items" @click="navigate('/others')">Others</span> -->
         </div>
 
@@ -57,9 +57,9 @@
         <!-- Center Nav: Only visible on md and up -->
         <div class="row justify-center q-gutter-xl items-center gt-md q-md-flex">
           <span class="text-h6 cursor-pointer menu-items" @click="navigate('/cards')">Cards</span>
-          <span class="text-h6 cursor-pointer menu-items" @click="navigate('/preOrders')"
+          <!-- <span class="text-h6 cursor-pointer menu-items" @click="navigate('/preOrders')"
             >Pre-Orders</span
-          >
+          > -->
           <!-- <span class="text-h6 cursor-pointer menu-items" @click="navigate('/others')">Others</span> -->
         </div>
 

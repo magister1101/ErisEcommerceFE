@@ -18,18 +18,18 @@
               class="q-mb-md"
             />
 
-            <q-input v-model="firstName" label="First Name" outlined class="q-mb-md" />
-            <q-input v-model="lastName" label="Last Name" outlined class="q-mb-md" />
+            <q-input v-model="firstName" label="First Name" outlined required class="q-mb-md" />
+            <q-input v-model="lastName" label="Last Name" outlined required class="q-mb-md" />
             <q-input v-model="middleName" label="Middle Name" outlined class="q-mb-md" />
-            <q-input v-model="email" label="Email" type="email" outlined class="q-mb-md" />
+            <q-input v-model="email" label="Email" type="email" outlined required class="q-mb-md" />
           </q-card-section>
           <q-card-section>
             <q-btn
               class="q-py-lg q-px-lg"
-              label="login"
+              label="Signup"
               no-cap
               color="primary"
-              icon="login"
+              icon="add"
               type="submit"
               :loading="loading"
               style="width: 100%; border-radius: 15px"
@@ -45,6 +45,9 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const $q = useQuasar()
 
@@ -79,7 +82,7 @@ const handleSubmit = async () => {
     )
 
     $q.notify({ type: 'positive', message: 'User created successfully' })
-    console.log(response.data)
+    router.replace('/login')
   } catch (err) {
     $q.notify({ type: 'negative', message: err.response?.data?.message || 'Error creating user' })
     console.error(err)

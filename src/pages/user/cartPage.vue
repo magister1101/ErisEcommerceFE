@@ -79,7 +79,7 @@
 
         <!-- Order Form -->
         <div class="q-mt-md">
-          <q-form @submit.prevent="submitOrder" ref="orderForm">
+          <q-form @submit.prevent="confirmOrder" ref="orderForm">
             <q-select
               v-model="paymentMethod"
               :options="['Gcash']"
@@ -89,7 +89,7 @@
               map-options
               required
             />
-            <q-toggle v-model="isPickup" label="Pickup" color="primary" class="q-mt-sm" />
+
             <q-input
               v-if="!isPickup"
               v-model="shippingAddress"
@@ -98,7 +98,25 @@
               filled
               class="q-mt-sm"
             />
-            <div class="text-h6 q-mt-md">Total: ₱{{ totalSelectedPrice.toFixed(2) }}</div>
+
+            <q-select
+              v-if="isPickup"
+              v-model="shippingAddress"
+              label="Pickup Location"
+              required
+              filled
+              emit-value
+              class="q-mt-sm"
+              :options="pickupLocationsOptions"
+            />
+
+            <q-toggle v-model="isPickup" label="Pickup" color="primary" class="q-mt-sm" />
+
+            <div class="text-h6 q-mt-md">Total: ₱ {{ totalSelectedPrice.toFixed(2) }}</div>
+            <div class="text-h6 q-mt-sm" v-if="!isPickup">Shipping Fee: ₱{{ shippingPrice }}</div>
+            <q-separator></q-separator>
+            <div class="text-h6 q-mt-sm">SubTotal: ₱{{ subTotal }}</div>
+
             <q-btn
               label="Create Order"
               type="submit"
@@ -114,9 +132,56 @@
     </q-card>
 
     <!-- Image Preview Dialog -->
-    <q-dialog v-model="previewImageUrl">
+    <q-dialog v-model="previewImageUrlDialog">
       <q-card style="max-width: 90vw; max-height: 90vh">
         <q-img :src="previewImageUrl" style="max-width: 100%; max-height: 100%" />
+      </q-card>
+    </q-dialog>
+
+    <!-- confirm dialog -->
+    <q-dialog v-model="confirmDialog" persistent>
+      <q-card
+        class="q-pa-md"
+        style="width: 100%; max-width: 400px; height: auto; max-height: 90vh; overflow-y: auto"
+      >
+        <!-- Image -->
+        <q-img
+          src="https://res.cloudinary.com/dvyjiepra/image/upload/v1750290161/gcash_bgqc5n.jpg"
+          class="rounded-borders q-mb-md"
+          style="width: 100%; height: auto; object-fit: contain; background-color: #f5f5f5"
+        />
+
+        <!-- Total Price -->
+        <q-card-section class="q-pt-md">
+          <div class="text-h6 text-center">Total: ₱{{ subTotal.toFixed(2) }}</div>
+        </q-card-section>
+
+        <!-- Upload Section -->
+        <q-card-section>
+          <q-file
+            v-model="dialogImageFile"
+            accept="image/*"
+            borderless
+            label="Upload Payment Screenshot"
+            dense
+            standout="bg-grey-2"
+            class="truncate-file"
+            use-chips
+            counter
+          />
+        </q-card-section>
+
+        <!-- Actions -->
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="primary" @click="confirmDialog = false" />
+          <q-btn
+            label="Confirm"
+            color="primary"
+            :disable="!dialogImageFile"
+            @click="submitOrder"
+            :loading="confirmLoading"
+          />
+        </q-card-actions>
       </q-card>
     </q-dialog>
   </q-page>
@@ -128,16 +193,34 @@ import axios from 'axios'
 import { Notify } from 'quasar'
 import { useRouter } from 'vue-router'
 import { validation } from '../../components/userViewerUtility.js'
+import { uploadToCloud } from 'src/components/cloudinaryUtility'
 
 const userId = ref('')
 const viewer = ref(null)
 
 const router = useRouter()
 
+const confirmLoading = ref(false)
+
+const pickupLocationsOptions = [
+  { label: 'Aqua Card Games and Collectables', value: 'Aqua Card Games and Collectables' },
+  { label: 'UniAqua Feliz', value: 'UniAqua Feliz' },
+]
+
 const loading = ref(true)
 const cart = ref([])
+const dialogImageFile = ref(null)
+
 const previewImageUrl = ref(null)
+const previewImageUrlDialog = ref(false)
 const selectedRows = ref([])
+
+const shippingPrice = ref(100)
+const subTotal = computed(() => {
+  return isPickup.value ? totalSelectedPrice.value : totalSelectedPrice.value + shippingPrice.value
+})
+
+const confirmDialog = ref(false)
 
 const paymentMethod = ref('')
 const isPickup = ref(true)
@@ -199,7 +282,8 @@ async function validate() {
 }
 
 function previewImage(url) {
-  previewImageUrl.value = url
+  // previewImageUrl.value = url
+  // previewImageUrlDialog.value = true
 }
 
 async function fetchUserCart() {
@@ -225,7 +309,17 @@ const totalSelectedPrice = computed(() => {
   }, 0)
 })
 
+async function confirmOrder() {
+  try {
+    dialogImageFile.value = null
+    confirmDialog.value = true
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 async function submitOrder() {
+  confirmLoading.value = true
   if (selectedRows.value.length === 0) {
     Notify.create({ type: 'warning', message: 'Please select products to order' })
     return
@@ -237,13 +331,16 @@ async function submitOrder() {
   }))
 
   try {
+    const imageUrl = await uploadToCloud(dialogImageFile.value)
+
     const orderPayload = {
       products,
-      totalPrice: totalSelectedPrice.value,
+      totalPrice: subTotal.value,
       paymentMethod: paymentMethod.value,
       isPickup: isPickup.value,
-      shippingAddress: isPickup.value ? '' : shippingAddress.value,
-      shippingPrice: isPickup.value ? 0 : 50,
+      shippingAddress: shippingAddress.value,
+      shippingPrice: isPickup.value ? 0 : shippingPrice.value,
+      proofOfPayment: imageUrl,
     }
 
     const token = localStorage.getItem('authToken')
@@ -268,6 +365,9 @@ async function submitOrder() {
       type: 'negative',
       message: error.response?.data?.message || 'Failed to create order',
     })
+  } finally {
+    confirmDialog.value = false
+    confirmLoading.value = false
   }
 }
 
@@ -304,3 +404,12 @@ onMounted(() => {
   fetchUserCart()
 })
 </script>
+
+<style scoped lang="sass">
+.truncate-file
+  .q-chip
+    max-width: 100%
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+</style>

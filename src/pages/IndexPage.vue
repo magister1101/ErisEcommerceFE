@@ -32,6 +32,10 @@
       <q-card-section>
         <p class="text-h5 text-bold">Featured Cards</p>
 
+        <div v-if="featuredCardsLoading" class="flex flex-center q-my-xl">
+          <q-spinner-dots color="primary" size="50px" />
+        </div>
+
         <div class="row q-col-gutter-md q-mt-md">
           <div
             v-for="card in featuredCards"
@@ -81,6 +85,10 @@
     <div class="q-mx-xl q-my-md">
       <q-card-section>
         <p class="text-h5 text-bold">Newly Added Cards</p>
+
+        <div v-if="newlyAddedCardsLoading" class="flex flex-center q-my-xl">
+          <q-spinner-dots color="primary" size="50px" />
+        </div>
 
         <div class="row q-col-gutter-md q-mt-md">
           <div
@@ -142,6 +150,9 @@ const featuredCards = ref([])
 const newlyAddedCards = ref([])
 const filteredCards = ref([])
 
+const featuredCardsLoading = ref(true)
+const newlyAddedCardsLoading = ref(true)
+
 async function getCards() {
   tableLoading.value = true
   try {
@@ -162,6 +173,8 @@ async function getCards() {
     console.error('Error fetching cards:', error)
   } finally {
     tableLoading.value = false
+    featuredCardsLoading.value = false
+    newlyAddedCardsLoading.value = false
   }
 }
 
