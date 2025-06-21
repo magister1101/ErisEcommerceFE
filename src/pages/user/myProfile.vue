@@ -133,6 +133,10 @@
           <div class="text-h6 q-mb-md">My Orders</div>
           <q-separator />
 
+          <div v-if="tableLoading" class="flex flex-center q-my-xl">
+            <q-spinner-dots color="primary" size="50px" />
+          </div>
+
           <div v-if="orders.length === 0" class="q-mt-md text-grey text-center">
             No orders found.
           </div>
@@ -179,6 +183,20 @@
                 </q-item>
 
                 <q-separator />
+                <q-item-label header class="q-mb-sm">Update</q-item-label>
+                <div
+                  style="
+                    width: 100%;
+                    max-width: 200px;
+                    background-color: #f5f5f5;
+                    border: 1px solid #ccc;
+                    cursor: pointer;
+                  "
+                >
+                  <q-img :src="order.fileUpdate"></q-img>
+                </div>
+
+                <q-separator />
                 <div class="text-right text-caption q-mt-sm">
                   Payment: {{ order.paymentMethod }}<br />
                   Pickup: {{ order.isPickup ? 'Yes' : 'No' }}<br />
@@ -215,6 +233,8 @@ import { Notify } from 'quasar'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
+const tableLoading = ref(false)
 
 const user = ref({})
 const orders = ref([])
@@ -283,6 +303,7 @@ async function fetchProfile() {
 
 async function fetchOrders() {
   try {
+    tableLoading.value = true
     const token = localStorage.getItem('authToken')
     const ordersRes = await axios.get(`${process.env.api_host}/orders/myOrders`, {
       headers: { Authorization: token },
@@ -290,6 +311,8 @@ async function fetchOrders() {
     orders.value = ordersRes.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   } catch (err) {
     console.error(err)
+  } finally {
+    tableLoading.value = false
   }
 }
 

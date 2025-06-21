@@ -97,21 +97,6 @@
                       >
                       {{ props.row.shippingAddress }}
                     </div>
-                  </div>
-
-                  <div class="col-12 col-md-6">
-                    <div class="text-h6 q-mb-sm">Order Info</div>
-                    <div><strong>Total:</strong> ₱{{ props.row.totalPrice }}</div>
-                    <div><strong>Status:</strong> {{ props.row.status }}</div>
-                    <div><strong>Payment Method:</strong> {{ props.row.paymentMethod }}</div>
-                    <div><strong>Pickup:</strong> {{ props.row.isPickup ? 'Yes' : 'No' }}</div>
-                    <div v-if="!props.row.isPickup">
-                      <strong>Shipping Address:</strong> {{ props.row.shippingAddress || 'N/A' }}
-                    </div>
-                    <div v-if="!props.row.isPickup">
-                      <strong>Shipping Price:</strong> ₱{{ props.row.shippingPrice || 0 }}
-                    </div>
-                    <div><strong>Ordered At:</strong> {{ formatDate(props.row.createdAt) }}</div>
 
                     <div v-if="props.row.proofOfPayment" class="q-mt-sm">
                       <strong>Proof of Payment:</strong><br />
@@ -128,6 +113,42 @@
                       >
                         <img
                           :src="props.row.proofOfPayment"
+                          style="width: 100%; height: auto; display: block; object-fit: contain"
+                          alt="Proof of Payment"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <div class="text-h6 q-mb-sm">Order Info</div>
+                    <div><strong>Total:</strong> ₱{{ props.row.totalPrice }}</div>
+                    <div><strong>Status:</strong> {{ props.row.status }}</div>
+                    <div><strong>Payment Method:</strong> {{ props.row.paymentMethod }}</div>
+                    <div><strong>Pickup:</strong> {{ props.row.isPickup ? 'Yes' : 'No' }}</div>
+                    <div v-if="!props.row.isPickup">
+                      <strong>Shipping Address:</strong> {{ props.row.shippingAddress || 'N/A' }}
+                    </div>
+                    <div v-if="!props.row.isPickup">
+                      <strong>Shipping Price:</strong> ₱{{ props.row.shippingPrice || 0 }}
+                    </div>
+                    <div><strong>Ordered At:</strong> {{ formatDate(props.row.createdAt) }}</div>
+
+                    <div v-if="props.row.fileUpdate" class="q-mt-sm">
+                      <strong>Update:</strong><br />
+                      <div
+                        class="q-mt-sm q-pa-sm rounded-borders"
+                        @click="showPreview(props.row.fileUpdate)"
+                        style="
+                          width: 100%;
+                          max-width: 200px;
+                          background-color: #f5f5f5;
+                          border: 1px solid #ccc;
+                          cursor: pointer;
+                        "
+                      >
+                        <img
+                          :src="props.row.fileUpdate"
                           style="width: 100%; height: auto; display: block; object-fit: contain"
                           alt="Proof of Payment"
                         />
@@ -158,13 +179,40 @@
                 </div>
 
                 <div class="q-mt-sm text-right">
-                  <q-badge
+                  <q-btn-dropdown
                     color="warning"
-                    label="UPDATE ORDER"
-                    clickable
-                    @click="openUpdateDialog(props.row)"
-                    class="q-mr-sm q-pa-md cursor-pointer text-white text-weight-bold"
-                  />
+                    label="Update Order"
+                    icon="settings"
+                    class="q-mb-sm"
+                    flat
+                    dense
+                  >
+                    <q-list>
+                      <q-item
+                        clickable
+                        v-close-popup
+                        @click="openUpdateStatusDialog(props.row)"
+                        class="q-px-sm"
+                      >
+                        <q-item-section avatar>
+                          <q-icon name="edit" color="info" />
+                        </q-item-section>
+                        <q-item-section class="text-info"> Status </q-item-section>
+                      </q-item>
+
+                      <q-item
+                        clickable
+                        v-close-popup
+                        @click="openUpdateUploadDialog(props.row)"
+                        class="q-px-sm"
+                      >
+                        <q-item-section avatar>
+                          <q-icon name="edit" color="info" />
+                        </q-item-section>
+                        <q-item-section class="text-info"> Upload </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-btn-dropdown>
                 </div>
               </q-card>
             </q-expansion-item>
@@ -225,6 +273,37 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <!-- Update upload Dialog -->
+    <q-dialog v-model="updateOrderUploadDialog" persistent>
+      <q-card style="min-width: 400px">
+        <q-card-section>
+          <div class="text-h6">Upload Update</div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section>
+          <q-file
+            class="q-px-md"
+            v-model="dialogImageFile"
+            accept="image/*"
+            borderless
+            label="Upload Profile Image"
+            dense
+          >
+            <template #append>
+              <q-icon name="upload"></q-icon>
+            </template>
+          </q-file>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="grey" v-close-popup />
+          <q-btn :loading="dialogUploadLoading" label="Save" color="primary" @click="saveUpdate" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -233,6 +312,7 @@ import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import { date, Notify } from 'quasar'
 import { useRouter } from 'vue-router'
+import { uploadToCloud } from 'src/components/cloudinaryUtility'
 
 const router = useRouter()
 
@@ -240,10 +320,13 @@ const orders = ref([])
 
 const orderId = ref('')
 const updateOrderDialog = ref(false)
+const updateOrderUploadDialog = ref(false)
 const updateOrderLoading = ref(false)
+const dialogUploadLoading = ref(false)
 
 const selectedStatus = ref('')
 const selectedPayment = ref('')
+const dialogImageFile = ref('')
 
 const previewDialog = ref(false)
 const previewImage = ref('')
@@ -304,6 +387,43 @@ async function getOrders() {
   }
 }
 
+async function saveUpdate() {
+  try {
+    dialogUploadLoading.value = true
+    const imageUrl = await uploadToCloud(dialogImageFile.value)
+
+    const token = localStorage.getItem('authToken')
+
+    await axios.post(
+      `${process.env.api_host}/orders/updateOrder/${orderId.value}`,
+      {
+        fileUpdate: imageUrl,
+      },
+      {
+        headers: {
+          Authorization: token,
+        },
+      },
+    )
+
+    Notify.create({
+      message: 'Uploaded successfully',
+      color: 'positive',
+      textColor: 'white',
+    })
+
+    await getOrders()
+    orders.value = [...orders.value]
+
+    router.go()
+  } catch (error) {
+    console.error(error)
+  } finally {
+    dialogUploadLoading.value = true
+    updateOrderUploadDialog.value = false
+  }
+}
+
 const filteredOrders = computed(() => {
   const search = filter.value.toLowerCase().trim()
   const status = statusFilter.value
@@ -323,11 +443,16 @@ function formatDate(datetime) {
   return date.formatDate(datetime, 'MMMM DD, YYYY HH:mm')
 }
 
-function openUpdateDialog(order) {
+function openUpdateStatusDialog(order) {
   orderId.value = order._id
   selectedStatus.value = order.status
   selectedPayment.value = order.paymentMethod
   updateOrderDialog.value = true
+}
+
+function openUpdateUploadDialog(order) {
+  orderId.value = order._id
+  updateOrderUploadDialog.value = true
 }
 
 async function submitOrderUpdate() {
