@@ -87,6 +87,16 @@
                       {{ props.row.buyer.lastName }}
                     </div>
                     <div><strong>Email:</strong> {{ props.row.buyer.email }}</div>
+                    <div>
+                      <strong>Mode of Delivery:</strong>
+                      {{ props.row.isPickup ? 'Pickup' : 'Delivery' }}
+                    </div>
+                    <div>
+                      <strong>
+                        {{ props.row.isPickup ? 'Pickup Location:' : 'Delivery Address:' }}</strong
+                      >
+                      {{ props.row.shippingAddress }}
+                    </div>
                   </div>
 
                   <div class="col-12 col-md-6">

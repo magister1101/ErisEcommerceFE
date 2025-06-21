@@ -1,7 +1,7 @@
 <template>
   <q-layout class="container" view="lHh Lpr lFf">
     <q-header reveal elevated class="shadow-2" style="background-color: #114090">
-      <q-toolbar v-if="user !== null" class="text-white q-px-lg q-py-md justify-between">
+      <q-toolbar class="text-white q-px-lg q-py-md justify-between">
         <!-- Left: Logo + Brand -->
         <div class="row items-center no-wrap cursor-pointer" @click="navigate('/')">
           <img
@@ -14,7 +14,9 @@
 
         <!-- Center Nav: Only visible on md and up -->
         <div class="row justify-center q-gutter-xl items-center gt-md q-md-flex">
-          <span class="text-h6 cursor-pointer menu-items" @click="navigate('/cards')">Cards</span>
+          <span class="text-h6 cursor-pointer menu-items" @click="navigate('/cards')"
+            >Products</span
+          >
           <!-- <span class="text-h6 cursor-pointer menu-items" @click="navigate('/preOrders')"
             >Pre-Orders</span
           > -->
@@ -37,48 +39,6 @@
             dense
             icon="shopping_cart"
             @click="navigate('/cart')"
-            class="q-hidden q-md-inline"
-          />
-          <q-btn flat dense icon="menu" class="lt-lg" @click="mobileMenu = !mobileMenu" />
-        </div>
-      </q-toolbar>
-
-      <q-toolbar v-if="user === null" class="text-white q-px-lg q-py-md justify-between">
-        <!-- Left: Logo + Brand -->
-        <div class="row items-center no-wrap cursor-pointer" @click="navigate('/')">
-          <img
-            src="https://res.cloudinary.com/dvyjiepra/image/upload/v1744075727/Eris_LOGO_wy0z2j.png"
-            alt="Eris Logo"
-            style="width: 40px; height: auto"
-          />
-          <span class="q-ml-sm text-h5 text-bold brand-name">ERIS エリス</span>
-        </div>
-
-        <!-- Center Nav: Only visible on md and up -->
-        <div class="row justify-center q-gutter-xl items-center gt-md q-md-flex">
-          <span class="text-h6 cursor-pointer menu-items" @click="navigate('/cards')">Cards</span>
-          <!-- <span class="text-h6 cursor-pointer menu-items" @click="navigate('/preOrders')"
-            >Pre-Orders</span
-          > -->
-          <!-- <span class="text-h6 cursor-pointer menu-items" @click="navigate('/others')">Others</span> -->
-        </div>
-
-        <!-- Right: Account, Cart, and Mobile Menu -->
-        <div class="row items-center q-gutter-md">
-          <q-btn
-            flat
-            round
-            dense
-            icon="account_circle"
-            @click="navigate('/login')"
-            class="q-hidden q-md-inline"
-          />
-          <q-btn
-            flat
-            round
-            dense
-            icon="shopping_cart"
-            @click="navigate('/login')"
             class="q-hidden q-md-inline"
           />
           <q-btn flat dense icon="menu" class="lt-lg" @click="mobileMenu = !mobileMenu" />
@@ -119,10 +79,21 @@ const user = ref(null)
 
 const searchInput = ref('')
 
-function navigate(path) {
-  fetchProfile()
+async function navigate(path) {
   mobileMenu.value = false
-  router.push(path)
+
+  if (path === '/' || path === '/cards') {
+    router.push(path)
+    return
+  }
+
+  await fetchProfile()
+
+  if (user.value !== null) {
+    router.push(path)
+  } else {
+    router.push('/login')
+  }
 }
 
 async function fetchProfile() {
@@ -136,8 +107,8 @@ async function fetchProfile() {
   }
 }
 
-onMounted(() => {
-  fetchProfile()
+onMounted(async () => {
+  await fetchProfile()
 })
 </script>
 

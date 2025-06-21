@@ -205,6 +205,7 @@ const confirmLoading = ref(false)
 const pickupLocationsOptions = [
   { label: 'Aqua Card Games and Collectables', value: 'Aqua Card Games and Collectables' },
   { label: 'UniAqua Feliz', value: 'UniAqua Feliz' },
+  { label: 'Robinson Galleria', value: 'Robinson Galleria' },
 ]
 
 const loading = ref(true)
@@ -399,9 +400,9 @@ async function removeFromCart(item) {
   }
 }
 
-onMounted(() => {
-  validate()
-  fetchUserCart()
+onMounted(async () => {
+  await validate()
+  await fetchUserCart()
 })
 </script>
 
